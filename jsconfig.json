@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "lib": ["es2015"]
   },
   "include": ["src"]
 }
