@@ -7,56 +7,43 @@ import { sendOtpToEmail, verifyOtp, signInWithGoogle } from "@/services/auth";
 import Loading from "@/components/Loading";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Link, useNavigate } from "react-router";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { Link } from "react-router";
 
-export default function SignUp() {
+export default function Signin() {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const naviagate = useNavigate();
 
-  const { isLoading: emailsending, mutate: sendotptoemailfn } = useMutation({
+  const {
+    data: sendemail,
+    isLoading: emailsending,
+    mutate: sendotptoemailfn,
+  } = useMutation({
     mutationFn: (email) => sendOtpToEmail(email),
-    mutationKey: ["auth", "send-otp"],
+    mutationKey: ["auth"],
     onSuccess: () => {
       setOtpSent(true);
       toast({
-        title: "OTP Sent",
-        description: "Check your email for the verification code.",
+        title: "Sucesss",
+        description: "Magic link sent Sucessfully",
       });
     },
-    onError: (error) => {
+    onError: () => {
+      setOtpSent(false);
       toast({
-        title: "Error Sending OTP",
-        description: error?.message || "Something went wrong.",
-        variant: "destructive",
+        title: "Error",
+        description: "something went wrong",
       });
     },
   });
-  const { isLoading: otpvarifying, mutate: otpvarifyfn } = useMutation({
+  const {
+    data: varifyotp,
+    isLoading: otpvarifying,
+    mutate: otpvarifyfn,
+  } = useMutation({
     mutationFn: (otp) => verifyOtp(otp),
-    mutationKey: ["auth", "verify-otp"],
-    onSuccess: () => {
-      toast({
-        title: "OTP Verified",
-        description: "You're now signed in!",
-      });
-      naviagate("/register");
-    },
-    onError: (error) => {
-      toast({
-        title: "Verification Failed",
-        description:
-          error?.message || "An unexpected error occurred during verification.",
-        variant: "destructive",
-      });
-    },
+    mutationKey: ["auth"],
   });
 
   const handlesendotp = () => {
@@ -64,17 +51,12 @@ export default function SignUp() {
     sendotptoemailfn(email);
   };
 
-  const handlesigninwithgoogle = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      toast({
-        title: "Failed",
-        description:
-          err?.message || "An unexpected error occurred during Sign UP.",
-        variant: "destructive",
-      });
-    }
+  const handlevarifyotp = () => {
+    if (!otp) return;
+    otpvarifyfn(email, otp);
+  };
+  const handlesigninwithgoogle = () => {
+    signInWithGoogle();
   };
 
   if (otpvarifying || emailsending) return <Loading />;
@@ -85,30 +67,7 @@ export default function SignUp() {
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <div className="mx-auto w-full max-w-sm  rounded-md p-6 shadow">
             {otpSent ? (
-              <div className="space-y-4">
-                <InputOTP
-                  maxLength={6}
-                  value={otp}
-                  onChange={(value) => setOtp(value)}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-
-                <Button
-                  className="w-full"
-                  disabled={otp.length !== 6 || otpvarifying}
-                  onClick={() => otpvarifyfn({ email, token: otp })}
-                >
-                  {otpvarifying ? "Varifying..." : "Verify Code"}
-                </Button>
-              </div>
+              <div>We have sent a magic link to your email go to email</div>
             ) : (
               <>
                 <div className="mb-6 flex flex-col items-center">
@@ -117,7 +76,7 @@ export default function SignUp() {
                   </Link>
                   <h1 className="mb-2 text-2xl font-bold">Demam Platform</h1>
                   <p className="text-muted-foreground">
-                    Please Sign Up To Demam Platform
+                    Please Sign In To Demam Platform
                   </p>
                 </div>
                 <div>
@@ -134,9 +93,8 @@ export default function SignUp() {
                       type="submit"
                       className="mt-2 w-full"
                       onClick={handlesendotp}
-                      disabled={emailsending}
                     >
-                      {emailsending ? "Sending OTP" : "Send OTP"}
+                      send otp
                     </Button>
                     <Button
                       variant="outline"
@@ -149,9 +107,9 @@ export default function SignUp() {
                   </div>
 
                   <div className="mx-auto mt-8 flex justify-center gap-1 text-sm text-muted-foreground">
-                    <p>i have an account</p>
-                    <Link to="/signin" className="font-medium text-primary">
-                      Sign In
+                    <p>i dont have an account</p>
+                    <Link to="/signup" className="font-medium text-primary">
+                      Sign Up
                     </Link>
                   </div>
                 </div>

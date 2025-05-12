@@ -1,39 +1,48 @@
 import supabase from "./supabase";
 
 const sendOtpToEmail = async (email) => {
-  const res = await supabase.auth.signInWithOtp({
-    email,
-  });
-  if (!res) {
-    throw new Error("Please try again");
+  try {
+    const { error, data } = await supabase.auth.signInWithOtp({
+      email,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    throw new Error(`${err.message}`);
   }
-  return res;
 };
-const verifyOtp = async (email, otpCode) => {
-  const res = await supabase.auth.verifyOtp({
-    email,
-    token: otpCode,
-    type: "email",
-  });
-  if (!res) {
-    throw new Error("Please try again");
-  }
 
-  return res;
+const verifyOtp = async ({ email, token }) => {
+  try {
+    const { error, data } = await supabase.auth.verifyOtp({
+      email,
+      token: token,
+      type: "email",
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    throw new Error(`${err.message}`);
+  }
 };
 
 const signInWithGoogle = async () => {
-  const res = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    // options: {
-    //   redirectTo: "",
-    // },
-  });
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
 
-  if (!res) {
-    throw new Error("Please Try Again");
+    if (error) {
+      throw new Error(`${error.message}`);
+    }
+    return data;
+  } catch (err) {
+    throw new Error(`${err.message}`);
   }
-  return data;
 };
 
 export { sendOtpToEmail, verifyOtp, signInWithGoogle };
