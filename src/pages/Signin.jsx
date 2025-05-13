@@ -2,8 +2,8 @@ import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { sendOtpToEmail, verifyOtp, signInWithGoogle } from "@/services/auth";
+import { useMutation } from "@tanstack/react-query";
+import { verifyOtp, signInWithGoogle, signinuser } from "@/services/auth";
 import Loading from "@/components/Loading";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,52 +14,63 @@ export default function Signin() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-
-  const {
-    data: sendemail,
-    isLoading: emailsending,
-    mutate: sendotptoemailfn,
-  } = useMutation({
-    mutationFn: (email) => sendOtpToEmail(email),
+  const { mutateAsync } = useMutation({
+    mutationFn: (email) => signinuser(email),
     mutationKey: ["auth"],
     onSuccess: () => {
+      toast({
+        title: "OTP Sent",
+        description: "Check your email for the verification code.",
+      });
       setOtpSent(true);
-      toast({
-        title: "Sucesss",
-        description: "Magic link sent Sucessfully",
-      });
     },
-    onError: () => {
-      setOtpSent(false);
+    onError: (err) => {
       toast({
-        title: "Error",
-        description: "something went wrong",
+        title: "Error Sending OTP",
+        description: err?.message || "Something went wrong.",
+        variant: "destructive",
       });
     },
   });
-  const {
-    data: varifyotp,
-    isLoading: otpvarifying,
-    mutate: otpvarifyfn,
-  } = useMutation({
-    mutationFn: (otp) => verifyOtp(otp),
+  const { mutateAsync: varifyotp } = useMutation({
+    mutationFn: ({ email, otp }) => verifyOtp({ email, otp }),
     mutationKey: ["auth"],
+    onSuccess: () => {
+      toast({
+        title: "OTP Verified",
+        description: "You're now signed in!",
+      });
+      naviagate("/products");
+    },
+    onError: (err) => {
+      toast({
+        title: "Verification Failed",
+        description:
+          err?.message || "An unexpected error occurred during verification.",
+        variant: "destructive",
+      });
+    },
   });
-
-  const handlesendotp = () => {
-    if (!email) return;
-    sendotptoemailfn(email);
+  const handleotpvarify = () => {
+    varifyotp({ email, otp });
   };
 
-  const handlevarifyotp = () => {
-    if (!otp) return;
-    otpvarifyfn(email, otp);
-  };
-  const handlesigninwithgoogle = () => {
-    signInWithGoogle();
+  const handlesignin = () => {
+    mutateAsync(email);
   };
 
-  if (otpvarifying || emailsending) return <Loading />;
+  const handlesigninwithgoogle = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      toast({
+        title: "Failed",
+        description:
+          err?.message || "An unexpected error occurred during Sign UP.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <section className="py-32 flex justify-center items-center min-h-screen">
@@ -67,7 +78,30 @@ export default function Signin() {
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <div className="mx-auto w-full max-w-sm  rounded-md p-6 shadow">
             {otpSent ? (
-              <div>We have sent a magic link to your email go to email</div>
+              <div className="space-y-4">
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={(value) => setOtp(value)}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+
+                <Button
+                  className="w-full"
+                  disabled={otp.length !== 6 || otpvarifying}
+                  onClick={() => handleotpvarify}
+                >
+                  {otpvarifying ? "Varifying..." : "Verify Code"}
+                </Button>
+              </div>
             ) : (
               <>
                 <div className="mb-6 flex flex-col items-center">
@@ -92,7 +126,7 @@ export default function Signin() {
                     <Button
                       type="submit"
                       className="mt-2 w-full"
-                      onClick={handlesendotp}
+                      onClick={handlesignin}
                     >
                       send otp
                     </Button>
@@ -102,7 +136,7 @@ export default function Signin() {
                       onClick={handlesigninwithgoogle}
                     >
                       <FcGoogle className="mr-2 size-5" />
-                      Sign Up with Google
+                      Sign In with Google
                     </Button>
                   </div>
 

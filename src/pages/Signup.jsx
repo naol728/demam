@@ -45,7 +45,7 @@ export default function SignUp() {
     },
   });
   const { isLoading: otpvarifying, mutate: otpvarifyfn } = useMutation({
-    mutationFn: (otp) => verifyOtp(otp),
+    mutationFn: ({ email, otp }) => verifyOtp({ email, otp }),
     mutationKey: ["auth", "verify-otp"],
     onSuccess: () => {
       toast({
@@ -82,7 +82,7 @@ export default function SignUp() {
     }
   };
 
-  if (userid) return <Navigate to="/" replace />;
+  // if (userid) return <Navigate to="/" replace />;
 
   if (otpvarifying || emailsending) return <Loading />;
 

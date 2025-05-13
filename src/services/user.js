@@ -36,7 +36,15 @@ export async function addUser({ name, role, profileImage }) {
 
     const { data, error } = await supabase
       .from("users")
-      .insert([{ userid: userId, name, role, profileimg: publicUrl }])
+      .insert([
+        {
+          userid: userId,
+          name,
+          role,
+          profileimg: publicUrl,
+          email: session.user.email,
+        },
+      ])
       .select();
 
     if (error) {
