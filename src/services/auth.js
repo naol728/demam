@@ -2,6 +2,20 @@ import supabase from "./supabase";
 
 const sendOtpToEmail = async (email) => {
   try {
+    const { data: userdata, error: err } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", { email })
+      .single();
+
+    // if (err && err.code !== "PGRST116") {
+    //   throw new Error(err.message);
+    // }
+
+    if (userdata) {
+      throw new Error("A user already exists with this email.");
+    }
+
     const { error, data } = await supabase.auth.signInWithOtp({
       email,
     });
@@ -62,4 +76,37 @@ async function getCurrentUserId() {
   }
 }
 
-export { sendOtpToEmail, verifyOtp, signInWithGoogle, getCurrentUserId };
+const signinuser = async (email) => {
+  try {
+    const { data: user, error: err } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    // if (err) {
+    //   throw new Error(err.message);
+    // }
+
+    if (!user) {
+      throw new Error("A user does not exist with this email. ");
+    }
+    const { error, data } = await supabase.auth.signInWithOtp({
+      email,
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+export {
+  sendOtpToEmail,
+  verifyOtp,
+  signInWithGoogle,
+  getCurrentUserId,
+  signinuser,
+};
