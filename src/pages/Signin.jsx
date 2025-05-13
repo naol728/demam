@@ -62,7 +62,7 @@ export default function Signin() {
   if (otpvarifying || emailsending) return <Loading />;
 
   return (
-    <section className="py-32">
+    <section className="py-32 flex justify-center items-center min-h-screen">
       <div className="container">
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <div className="mx-auto w-full max-w-sm  rounded-md p-6 shadow">

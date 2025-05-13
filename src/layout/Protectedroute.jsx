@@ -23,7 +23,7 @@ export default function Protectedroute({ role }) {
       const { data: user, error } = await supabase
         .from("users")
         .select("role")
-        .eq("id", session.user.id)
+        .eq("userid", session.user.id)
         .single();
 
       if (error || !user) {

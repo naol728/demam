@@ -2,12 +2,16 @@ import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { sendOtpToEmail, verifyOtp, signInWithGoogle } from "@/services/auth";
+import { useMutation } from "@tanstack/react-query";
+import {
+  sendOtpToEmail,
+  verifyOtp,
+  signInWithGoogle,
+  getCurrentUserId,
+} from "@/services/auth";
 import Loading from "@/components/Loading";
 import { useToast } from "@/hooks/use-toast";
-import { Toaster } from "@/components/ui/toaster";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import {
   InputOTP,
   InputOTPGroup,
@@ -15,6 +19,7 @@ import {
 } from "@/components/ui/input-otp";
 
 export default function SignUp() {
+  const userid = getCurrentUserId();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -77,10 +82,12 @@ export default function SignUp() {
     }
   };
 
+  if (userid) return <Navigate to="/" replace />;
+
   if (otpvarifying || emailsending) return <Loading />;
 
   return (
-    <section className="py-32">
+    <section className="py-32 flex justify-center items-center min-h-screen">
       <div className="container">
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <div className="mx-auto w-full max-w-sm  rounded-md p-6 shadow">
@@ -160,7 +167,6 @@ export default function SignUp() {
           </div>
         </div>
       </div>
-      <Toaster />
     </section>
   );
 }

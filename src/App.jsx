@@ -7,16 +7,21 @@ import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
+import Register from "./pages/Register";
+import MainLayout from "./layout/MainLayout";
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/register" element={<>register the user</>} />
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/signin" element={<Signin />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
+
           <Route element={<Protectedroute role="merchant" />}>
             <Route path="/products" element={<Products />} />
             <Route path="/orders" element={<Orders />} />
@@ -42,6 +47,7 @@ function App() {
               element={<>seller seeing products page</>}
             />
           </Route>
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       </BrowserRouter>
     </>
