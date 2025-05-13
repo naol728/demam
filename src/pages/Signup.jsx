@@ -7,25 +7,29 @@ import { signupuser } from "@/services/auth";
 import Loading from "@/components/Loading";
 import { useToast } from "@/hooks/use-toast";
 import { Link, Navigate, useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 
 export default function SignUp() {
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
+  const [role, setRole] = useState("merchant");
   const [profileimg, setProfileImg] = useState(null);
+  const [phone, setPhone] = useState("");
+  const { user, Loading } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const { mutateAsync, isLoading } = useMutation({
     mutationFn: (data) => signupuser(data),
     mutationKey: ["auth"],
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Sign up successful",
         description: "You have successfully signed up!",
       });
       navigate("/");
+      console.log(data);
     },
     onError: (err) => {
       toast({
@@ -51,10 +55,14 @@ export default function SignUp() {
     await mutateAsync(data);
   };
 
+  if (Loading) return <Loading />;
+
+  if (user) return <Navigate to="/" replace={true} />;
+
   return (
-    <section className="py-32 flex justify-center items-center min-h-screen">
+    <section className=" flex justify-center items-center ">
       <div className="container">
-        <div className="flex flex-col items-center justify-center h-full gap-4">
+        <div className="flex flex-col items-center justify-center  gap-4">
           <form
             onSubmit={handlesignup}
             className="mx-auto w-full max-w-sm rounded-md p-6 shadow"
@@ -69,29 +77,51 @@ export default function SignUp() {
               </p>
             </div>
             <div className="grid gap-4">
-              <Input
-                type="text"
-                placeholder="Enter your Full Name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <div>
+                <label className="block mb-1"> FULL Name</label>
 
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+                <Input
+                  type="text"
+                  placeholder="Enter your Full Name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
 
+              <div>
+                <label className="block mb-1"> Email</label>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1"> Password</label>
+                <Input
+                  type="password"
+                  placeholder="Enter your password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <label className="block mb-1">Phone Number</label>
+                <Input
+                  type="tel"
+                  id="phone"
+                  placeholder="+251912345678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="focus-visible:ring-primary"
+                />
+              </div>
               {/* Profile Image Input */}
               <div>
                 <label className="block mb-1">Profile Image</label>
@@ -104,13 +134,15 @@ export default function SignUp() {
 
               {/* Role selection */}
               <div className="mt-2">
-                <label className="block mb-2">Select Role:</label>
+                <label className="mb-2 block text-sm font-medium text-foreground">
+                  Select Role:
+                </label>
                 <select
-                  className="w-full p-2 border rounded"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                 >
-                  <option value="user">User</option>
+                  <option value="seller">Seller</option>
                   <option value="merchant">Merchant</option>
                 </select>
               </div>

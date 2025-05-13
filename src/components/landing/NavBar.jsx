@@ -26,6 +26,7 @@ import { Link } from "react-router";
 import { getCurrentUserFromDB } from "@/services/user";
 import { useEffect, useState } from "react";
 import { signOut } from "@/services/auth";
+import { useSelector } from "react-redux";
 
 const NavBar = ({
   logo = {
@@ -54,22 +55,8 @@ const NavBar = ({
     signup: { title: "Sign up", url: "/signup" },
   },
 }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchuser() {
-      try {
-        const data = await getCurrentUserFromDB();
-        setUser(data);
-      } catch (error) {
-        console.error("Failed to fetch user", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchuser();
-  }, []);
+  const { user, role, loading } = useSelector((state) => state.user);
+  console.log(role, user);
 
   return (
     <section className="py-4">
@@ -93,25 +80,16 @@ const NavBar = ({
             </div>
           </div>
           <div className="flex gap-2">
-            {loading ? null : user ? (
-              <Button asChild size="sm">
-                {user.role === "seller" ? (
-                  <>
-                    <Button onClick={() => signOut()}>Sign out</Button>
-                    <Link to="/myproducts">Dashboard</Link>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="outlined" onClick={signOut}>
-                      Sign out
-                    </Button>
-                    <Button>
-                      {" "}
-                      <Link to="/products">Shop Now</Link>
-                    </Button>
-                  </>
-                )}
-              </Button>
+            {loading ? null : role ? (
+              <>
+                <Button asChild size="sm">
+                  {role === "seller" ? ( // ✅ check for "seller"
+                    <Link to="/dashboard/products">Dashboard</Link>
+                  ) : (
+                    <Link to="/products">Shop Now</Link>
+                  )}
+                </Button>
+              </>
             ) : (
               <>
                 <Button asChild variant="outline" size="sm">
@@ -154,14 +132,16 @@ const NavBar = ({
                   </Accordion>
 
                   <div className="flex flex-col gap-3">
-                    {loading ? null : user ? (
-                      <Button asChild size="sm">
-                        {user.role === "seller" ? ( // ✅ check for "seller"
-                          <Link to="/myproducts">Dashboard</Link>
-                        ) : (
-                          <Link to="/products">Shop Now</Link>
-                        )}
-                      </Button>
+                    {loading ? null : role ? (
+                      <>
+                        <Button asChild size="sm">
+                          {role === "seller" ? ( // ✅ check for "seller"
+                            <Link to="/dashboard/products">Dashboard</Link>
+                          ) : (
+                            <Link to="/products">Shop Now</Link>
+                          )}
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Button asChild variant="outline" size="sm">
