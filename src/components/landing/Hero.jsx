@@ -25,9 +25,6 @@ const Hero = () => {
                   <ArrowRight className="size-4" />
                 </Button>
               </Link>
-              <Link to="/signin">
-                <Button variant="outline">Sell Product</Button>
-              </Link>
             </div>
           </div>
           <img
