@@ -23,9 +23,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "react-router";
-import { getCurrentUserId } from "@/services/auth";
 import { getCurrentUserFromDB } from "@/services/user";
 import { useEffect, useState } from "react";
+import { signOut } from "@/services/auth";
 
 const NavBar = ({
   logo = {
@@ -54,11 +54,19 @@ const NavBar = ({
     signup: { title: "Sign up", url: "/signup" },
   },
 }) => {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     async function fetchuser() {
-      const data = await getCurrentUserFromDB();
-      setUser(data);
+      try {
+        const data = await getCurrentUserFromDB();
+        setUser(data);
+      } catch (error) {
+        console.error("Failed to fetch user", error);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchuser();
   }, []);
@@ -85,12 +93,23 @@ const NavBar = ({
             </div>
           </div>
           <div className="flex gap-2">
-            {user ? (
+            {loading ? null : user ? (
               <Button asChild size="sm">
-                {user.role == "merchant" ? (
-                  <Link to="/products">Shop Now</Link>
+                {user.role === "seller" ? (
+                  <>
+                    <Button onClick={() => signOut()}>Sign out</Button>
+                    <Link to="/myproducts">Dashboard</Link>
+                  </>
                 ) : (
-                  <Link to="/myproducts">Dashboard</Link>
+                  <>
+                    <Button variant="outlined" onClick={signOut}>
+                      Sign out
+                    </Button>
+                    <Button>
+                      {" "}
+                      <Link to="/products">Shop Now</Link>
+                    </Button>
+                  </>
                 )}
               </Button>
             ) : (
@@ -106,10 +125,8 @@ const NavBar = ({
           </div>
         </nav>
 
-        {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
-            {/* Logo */}
             <Link to={logo.url} className="flex items-center gap-2">
               <img src={logo.src} className="max-h-8" alt={logo.alt} />
             </Link>
@@ -137,12 +154,12 @@ const NavBar = ({
                   </Accordion>
 
                   <div className="flex flex-col gap-3">
-                    {user ? (
+                    {loading ? null : user ? (
                       <Button asChild size="sm">
-                        {user.role == "merchant" ? (
-                          <Link to="/products">Shop Now</Link>
-                        ) : (
+                        {user.role === "seller" ? ( // ✅ check for "seller"
                           <Link to="/myproducts">Dashboard</Link>
+                        ) : (
+                          <Link to="/products">Shop Now</Link>
                         )}
                       </Button>
                     ) : (

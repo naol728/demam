@@ -41,7 +41,7 @@ export default function Protectedroute({ role }) {
   if (loading) return <Loading />;
 
   if (userRole !== role) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

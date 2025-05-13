@@ -31,7 +31,7 @@ function App() {
 
           <Route element={<Protectedroute role="seller" />}>
             <Route
-              path="/myproducts"
+              path="/products"
               element={<>seller seeing products page</>}
             />
             <Route

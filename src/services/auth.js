@@ -76,30 +76,120 @@ async function getCurrentUserId() {
   }
 }
 
-const signinuser = async (email) => {
+export async function getCurrentUserFromDB() {
   try {
-    const { data: user, error: err } = await supabase
+    const userId = await getCurrentUserId();
+
+    const { data, error } = await supabase
+      .from("users") // Your table name in Supabase
+      .select("*")
+      .eq("id", userId)
+      .single(); // Get a single user record
+
+    if (error || !data) {
+      throw new Error("Failed to fetch user data.");
+    }
+
+    return data; // contains user fields like id, email, role, etc.
+  } catch (err) {
+    console.error("Error fetching current user from DB:", err.message);
+    throw new Error(err.message);
+  }
+}
+async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+const signinUser = async ({ email, password }) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Optional: check if the user exists in the "users" table
+    const { data: userData, error: userError } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
 
-    // if (err) {
-    //   throw new Error(err.message);
-    // }
+    if (userError || !userData) {
+      throw new Error("User authentication succeeded, but no user data found.");
+    }
 
-    if (!user) {
-      throw new Error("A user does not exist with this email. ");
-    }
-    const { error, data } = await supabase.auth.signInWithOtp({
-      email,
-    });
-    if (error) {
-      throw new Error(error.message);
-    }
-    return data;
+    return userData; // Return the user record (including their role, etc.)
   } catch (err) {
     throw new Error(err.message);
+  }
+};
+
+const signupuser = async (data) => {
+  const { email, password, role, profileimg, name } = data;
+
+  try {
+    // 1. Create the user in Supabase Auth
+    const { data: signupData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (authError) {
+      throw new Error(authError.message);
+    }
+
+    const userId = signupData?.user?.id;
+
+    let profileImageUrl = null;
+
+    if (profileimg) {
+      const fileExt = profileimg.name.split(".").pop();
+      const filePath = `avatars/${userId}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, profileimg);
+
+      if (uploadError) {
+        throw new Error("Image upload failed: " + uploadError.message);
+      }
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      profileImageUrl = publicUrl;
+    }
+
+    const { data: userData, error: insertError } = await supabase
+      .from("users")
+      .insert([
+        {
+          email,
+          role,
+          userid: userId,
+          profileimg: profileImageUrl, // Save the image URL
+          name,
+          password,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
+
+    return { success: true, userData };
+  } catch (error) {
+    throw new Error(`Error during signup: ${error.message}`);
   }
 };
 
@@ -108,5 +198,7 @@ export {
   verifyOtp,
   signInWithGoogle,
   getCurrentUserId,
-  signinuser,
+  signinUser,
+  signupuser,
+  signOut,
 };
