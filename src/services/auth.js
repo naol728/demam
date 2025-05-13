@@ -45,4 +45,21 @@ const signInWithGoogle = async () => {
   }
 };
 
-export { sendOtpToEmail, verifyOtp, signInWithGoogle };
+async function getCurrentUserId() {
+  try {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error || !session?.user) {
+      throw new Error("No authenticated user found.");
+    }
+
+    return session.user.id;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+export { sendOtpToEmail, verifyOtp, signInWithGoogle, getCurrentUserId };

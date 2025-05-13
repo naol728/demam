@@ -23,6 +23,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "react-router";
+import { getCurrentUserId } from "@/services/auth";
+import { getCurrentUserFromDB } from "@/services/user";
+import { useEffect, useState } from "react";
 
 const NavBar = ({
   logo = {
@@ -51,6 +54,15 @@ const NavBar = ({
     signup: { title: "Sign up", url: "/signup" },
   },
 }) => {
+  const [user, setUser] = useState();
+  useEffect(() => {
+    async function fetchuser() {
+      const data = await getCurrentUserFromDB();
+      setUser(data);
+    }
+    fetchuser();
+  }, []);
+
   return (
     <section className="py-4">
       <div className="container">
@@ -73,12 +85,24 @@ const NavBar = ({
             </div>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link to={auth.login.url}>{auth.login.title}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to={auth.signup.url}>{auth.signup.title}</Link>
-            </Button>
+            {user ? (
+              <Button asChild size="sm">
+                {user.role == "merchant" ? (
+                  <Link to="/products">Shop Now</Link>
+                ) : (
+                  <Link to="/myproducts">Dashboard</Link>
+                )}
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={auth.login.url}>{auth.login.title}</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -113,12 +137,24 @@ const NavBar = ({
                   </Accordion>
 
                   <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <Link to={auth.login.url}>{auth.login.title}</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link to={auth.signup.url}>{auth.signup.title}</Link>
-                    </Button>
+                    {user ? (
+                      <Button asChild size="sm">
+                        {user.role == "merchant" ? (
+                          <Link to="/products">Shop Now</Link>
+                        ) : (
+                          <Link to="/myproducts">Dashboard</Link>
+                        )}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline" size="sm">
+                          <Link to={auth.login.url}>{auth.login.title}</Link>
+                        </Button>
+                        <Button asChild size="sm">
+                          <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </SheetContent>
@@ -175,9 +211,9 @@ const renderMobileMenuItem = (item) => {
   }
 
   return (
-    <a key={item.title} href={item.url} className="text-md font-semibold">
+    <Link key={item.title} to={item.url} className="text-md font-semibold">
       {item.title}
-    </a>
+    </Link>
   );
 };
 
