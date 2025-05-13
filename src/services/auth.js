@@ -98,6 +98,7 @@ export async function getCurrentUserFromDB() {
 }
 async function signOut() {
   const { error } = await supabase.auth.signOut();
+
   if (error) {
     throw new Error(error.message);
   }
@@ -105,6 +106,18 @@ async function signOut() {
 
 const signinUser = async ({ email, password }) => {
   try {
+    // Check if the user exists in the "users" table
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (userCheckError || !existingUser) {
+      throw new Error("No user found with this email.");
+    }
+
+    // Proceed with signing in the user
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -146,7 +159,7 @@ const signupuser = async (data) => {
     }
 
     const userId = signupData?.user?.id;
-
+    console.log(userId);
     let profileImageUrl = null;
 
     if (profileimg) {
