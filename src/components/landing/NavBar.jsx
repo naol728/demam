@@ -31,7 +31,7 @@ import { useSelector } from "react-redux";
 const NavBar = ({
   logo = {
     url: "/",
-    src: "https://icon2.cleanpng.com/20180510/ibw/avsv64c7w.webp",
+    src: "logo.jpg",
     alt: "logo",
     title: "Demam Platform",
   },
@@ -56,7 +56,6 @@ const NavBar = ({
   },
 }) => {
   const { user, role, loading } = useSelector((state) => state.user);
-  console.log(role, user);
 
   return (
     <section className="py-4">
@@ -66,7 +65,7 @@ const NavBar = ({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <Link to={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8" alt={logo.alt} />
+              <img src={logo.src} className="max-h-16 w-14" alt={logo.alt} />
               <span className="text-lg font-semibold tracking-tighter">
                 {logo.title}
               </span>
