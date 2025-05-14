@@ -145,7 +145,7 @@ const signinUser = async ({ email, password }) => {
 };
 
 const signupuser = async (data) => {
-  const { email, password, role, profileimg, name } = data;
+  const { email, password, role, profileimg, name, phone } = data;
 
   try {
     // 1. Create the user in Supabase Auth
@@ -159,7 +159,7 @@ const signupuser = async (data) => {
     }
 
     const userId = signupData?.user?.id;
-    console.log(userId);
+
     let profileImageUrl = null;
 
     if (profileimg) {
@@ -186,12 +186,14 @@ const signupuser = async (data) => {
       .from("users")
       .insert([
         {
+          id: userId,
           email,
           role,
           userid: userId,
           profileimg: profileImageUrl, // Save the image URL
           name,
           password,
+          phone,
           created_at: new Date().toISOString(),
         },
       ]);

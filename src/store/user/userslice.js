@@ -6,12 +6,11 @@ export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
     data: { session },
   } = await supabase.auth.getSession();
   const userId = session?.user?.id;
-  console.log(userId);
   if (!userId) return null;
 
   const { data, error } = await supabase
     .from("users")
-    .select("id, name, email, role")
+    .select("id, name, email, role,profileimg")
     .eq("userid", userId)
     .single();
 

@@ -31,7 +31,7 @@ import { useSelector } from "react-redux";
 const NavBar = ({
   logo = {
     url: "/",
-    src: "/",
+    src: "https://icon2.cleanpng.com/20180510/ibw/avsv64c7w.webp",
     alt: "logo",
     title: "Demam Platform",
   },
