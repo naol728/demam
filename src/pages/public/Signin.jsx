@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, Navigate } from "react-router";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import supabase from "./../services/supabase"; // make sure path is correct
+import supabase from "../../services/supabase"; // make sure path is correct
 
 export default function Signin() {
   const { toast } = useToast();

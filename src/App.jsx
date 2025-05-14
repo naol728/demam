@@ -1,22 +1,24 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import Signup from "./pages/Signup";
-import LandingPage from "./pages/LandingPage";
-import Signin from "./pages/Signin";
+import Signup from "./pages/public/Signup";
+import LandingPage from "./pages/public/LandingPage";
+import Signin from "./pages/public/Signin";
 import Protectedroute from "./layout/Protectedroute";
-import Products from "./pages/Products";
-import Orders from "./pages/Orders";
-import Cart from "./pages/Cart";
-import Profile from "./pages/Profile";
+import Products from "./pages/merchant/Products";
+import Orders from "./pages/merchant/Orders";
+import Cart from "./pages/merchant/Cart";
+import Profile from "./pages/merchant/Profile";
 import MainLayout from "./layout/MainLayout";
 import { useDispatch } from "react-redux";
 import { fetchUser } from "./store/user/userslice";
 import { useEffect } from "react";
-
-// Seller pages (placeholder JSX can be replaced later)
-const SellerProducts = () => <>Seller's Products</>;
-const SellerOrders = () => <>Seller's Orders</>;
-const SellerStats = () => <>Seller's Stats</>;
-const SellerProfile = () => <>Seller's Profile</>;
+import SellerLayout from "./layout/SellerLayout";
+import SellerProducts from "./pages/seller/SellerProducts";
+import SellerOrders from "./pages/seller/SellerOrders";
+import SellerStats from "./pages/seller/SellerStats";
+import SellerProfile from "./pages/seller/SellerProfile";
+import SellerProductAdd from "./pages/seller/SellerProductAdd";
+import SellerProductEdit from "./pages/seller/SellerProductEdit";
+import SellerProductLayout from "./layout/SellerProductLayout";
 
 function App() {
   const dispatch = useDispatch();
@@ -43,10 +45,17 @@ function App() {
 
         {/* Seller protected routes */}
         <Route element={<Protectedroute role="seller" />}>
-          <Route path="/dashboard/products" element={<SellerProducts />} />
-          <Route path="/dashboard/orders" element={<SellerOrders />} />
-          <Route path="/dashboard/stats" element={<SellerStats />} />
-          <Route path="/dashboard/profile" element={<SellerProfile />} />
+          <Route path="/dashboard" element={<SellerLayout />}>
+            <Route path="products" element={<SellerProductLayout />}>
+              <Route index element={<SellerProducts />} />
+              <Route path="new" element={<SellerProductAdd />} />
+              <Route path=":id/edit" element={<SellerProductEdit />} />
+            </Route>
+
+            <Route path="orders" element={<SellerOrders />} />
+            <Route path="stats" element={<SellerStats />} />
+            <Route path="profile" element={<SellerProfile />} />
+          </Route>
         </Route>
 
         {/* Catch-all route */}

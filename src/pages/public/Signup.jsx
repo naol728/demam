@@ -51,7 +51,7 @@ export default function SignUp() {
       });
       return;
     }
-    const data = { email, password, role, profileimg, name };
+    const data = { email, password, role, profileimg, name,phone };
     await mutateAsync(data);
   };
 
