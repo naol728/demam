@@ -5,25 +5,25 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Package,
   ShoppingCart,
   User,
   BarChart3,
   ChevronDown,
-} from "lucide-react"
-import { Link, useLocation } from "react-router"
-import { useSelector } from "react-redux"
-import Loading from "@/components/Loading"
+} from "lucide-react";
+import { Link, useLocation } from "react-router";
+import { useSelector } from "react-redux";
+import Loading from "@/components/Loading";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { Button } from "@/components/ui/button"
-import clsx from "clsx"
+} from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import clsx from "clsx";
 
 const navItems = [
   { title: "Products", url: "/dashboard/products", icon: Package },
@@ -31,27 +31,37 @@ const navItems = [
   { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
   { title: "Stats", url: "/dashboard/stats", icon: BarChart3 },
   { title: "Profile", url: "/dashboard/profile", icon: User },
-]
+];
 
 export function AppSidebar() {
-  const { user, role, loading } = useSelector((state) => state.user)
-  const location = useLocation()
+  const { user, role, loading } = useSelector((state) => state.user);
+  const location = useLocation();
 
-  if (loading) return <div className="h-dvh"><Loading /></div>
+  if (loading)
+    return (
+      <div className="h-dvh">
+        <Loading />
+      </div>
+    );
 
   return (
     <Sidebar className="h-screen border-r bg-background">
       <SidebarHeader />
       <Link to="/">
         <div className="text-xl font-bold text-center py-2 tracking-wide">
-          Demam Shop
+          <div className="flex justify-center items-center h-full">
+            <div>
+              <img src="/logo.jpg" className="size-5" alt="Logo" />
+              Demam Shop
+            </div>
+          </div>
         </div>
       </Link>
 
       <SidebarContent>
         <nav className="flex flex-col gap-1 p-4">
           {navItems.map(({ title, url, icon: Icon }) => {
-            const isActive = location.pathname.startsWith(url)
+            const isActive = location.pathname.startsWith(url);
 
             return (
               <Link
@@ -60,7 +70,7 @@ export function AppSidebar() {
                 className={clsx(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all",
                   {
-                    "bg-sidebar-accent text-foreground font-semibold": isActive,
+                    "bg-primary/80 text-foreground font-semibold": isActive,
                     "hover:bg-muted/70 text-muted-foreground": !isActive,
                   }
                 )}
@@ -68,7 +78,7 @@ export function AppSidebar() {
                 <Icon className="w-5 h-5" />
                 <span>{title}</span>
               </Link>
-            )
+            );
           })}
         </nav>
       </SidebarContent>
@@ -83,7 +93,9 @@ export function AppSidebar() {
               </Avatar>
               <div className="flex flex-col text-left">
                 <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground">{user.email}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user.email}
+                </span>
               </div>
             </div>
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -103,5 +115,5 @@ export function AppSidebar() {
         </Collapsible>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

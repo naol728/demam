@@ -1,37 +1,37 @@
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { toast, useToast } from "@/hooks/use-toast"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { getCatagories } from "@/services/catagorie"
-import Loading from "@/components/Loading"
-import { addnewProduct } from "@/services/products"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast, useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getCatagories } from "@/services/catagorie";
+import Loading from "@/components/Loading";
+import { addnewProduct } from "@/services/products";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {useNavigate} from "react-router"
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router";
 
 export default function SellerProductAdd() {
-  const navigate=useNavigate()
-  const { toast } = useToast()
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [price, setPrice] = useState("")
-  const [stockQuantity, setStockQuantity] = useState(0)
-  const [categoryId, setCategoryId] = useState("")
-  const [productimg, setProductimg] = useState()
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [stockQuantity, setStockQuantity] = useState(0);
+  const [categoryId, setCategoryId] = useState("");
+  const [productimg, setProductimg] = useState();
 
   const { data: categories, isLoading: loadingCatagories } = useQuery({
     queryFn: () => getCatagories(),
     queryKey: ["catagories"],
-  })
+  });
 
   const { mutate, isLoading } = useMutation({
     mutationFn: (data) => addnewProduct(data),
@@ -40,21 +40,22 @@ export default function SellerProductAdd() {
       toast({
         title: "Success",
         description: "Product added successfully!",
-      })
-      navigate("/dashboard/products")
+      });
+      navigate("/dashboard/products");
     },
     onError: (err) => {
       toast({
         title: "Error",
         description:
-          err?.message || "An unexpected error occurred while adding the product.",
+          err?.message ||
+          "An unexpected error occurred while adding the product.",
         variant: "destructive",
-      })
+      });
     },
-  })
+  });
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const data = {
       name,
       description,
@@ -62,11 +63,11 @@ export default function SellerProductAdd() {
       stock_quantity: parseInt(stockQuantity),
       category_id: categoryId,
       image_url: productimg,
-    }
-    await mutate(data)
-  }
+    };
+    await mutate(data);
+  };
 
-  if (loadingCatagories) return <Loading />
+  if (loadingCatagories) return <Loading />;
 
   return (
     <Card className="max-w-xl mx-auto shadow-md">
@@ -166,5 +167,5 @@ export default function SellerProductAdd() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
