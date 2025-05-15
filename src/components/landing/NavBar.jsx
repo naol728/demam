@@ -23,7 +23,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "react-router";
-import { getCurrentUserFromDB } from "@/services/user";
 import { useEffect, useState } from "react";
 import { signOut } from "@/services/auth";
 import { useSelector } from "react-redux";

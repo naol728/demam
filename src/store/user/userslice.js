@@ -10,7 +10,7 @@ export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
 
   const { data, error } = await supabase
     .from("users")
-    .select("id, name, email, role,profileimg")
+    .select("id, name, email, role,profileimg ,phone,address")
     .eq("userid", userId)
     .single();
 
@@ -30,6 +30,10 @@ const userSlice = createSlice({
       state.user = null;
       state.role = null;
       localStorage.removeItem("user_role");
+    },
+    setUser: (state, action) => {
+      if (!state.user) state.user = {};
+      state.user[action.payload.name] = action.payload.value;
     },
   },
   extraReducers: (builder) => {
@@ -51,5 +55,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearUser } = userSlice.actions;
+export const { clearUser, setUser } = userSlice.actions;
 export default userSlice.reducer;
