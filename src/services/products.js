@@ -23,7 +23,7 @@ export const getallProducts = async () => {
         )
       `
       )
-      .eq("merchant_id", userId);
+      .eq("seller_id", userId);
 
     if (fetchError) throw new Error(fetchError.message);
 
@@ -88,7 +88,7 @@ export const addnewProduct = async (data) => {
           price,
           stock_quantity,
           category_id,
-          merchant_id: userId,
+          seller_id: userId,
           image_url: productimgurl,
         },
       ])
@@ -159,7 +159,7 @@ export const updateProduct = async (id, data) => {
         updated_at: new Date(),
       })
       .eq("id", id)
-      .eq("merchant_id", userId) // security: make sure user is the owner
+      .eq("seller_id", userId) // security: make sure user is the owner
       .select();
 
     if (updateError) throw new Error(updateError.message);
