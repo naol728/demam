@@ -40,6 +40,7 @@ export default function SellerProfile() {
     let updateduserdata = { ...user };
 
     if (profileimg) updateduserdata = { ...user, profileimg };
+
     console.log(updateduserdata);
     mutate(updateduserdata);
   };
