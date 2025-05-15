@@ -3,6 +3,7 @@ import supabase from "./supabase";
 export const updateUser = async (updates) => {
   try {
     const { name, email, phone, address, profileimg } = updates;
+
     const {
       data: { session },
       error: sessionError,
@@ -12,6 +13,7 @@ export const updateUser = async (updates) => {
 
     const userId = session?.user?.id;
     if (!userId) throw new Error("User ID not found");
+
     let profileImageUrl = null;
 
     if (profileimg) {
@@ -20,13 +22,14 @@ export const updateUser = async (updates) => {
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, profileimg);
+        .upload(filePath, profileimg, {
+          upsert: true,
+        });
 
       if (uploadError) {
         throw new Error("Image upload failed: " + uploadError.message);
       }
 
-      // Get public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
@@ -34,18 +37,29 @@ export const updateUser = async (updates) => {
       profileImageUrl = publicUrl;
     }
 
+    const updatePayload = {
+      ...(name && { name }),
+      ...(email && { email }),
+      ...(profileImageUrl && { profile_image: profileImageUrl }),
+    };
+
+    if (phone || address) {
+      await supabase
+        .from("profiles")
+        .update({
+          ...(phone && { phone_number: phone }),
+          ...(address && { address }),
+        })
+        .eq("user_id", userId);
+    }
+
     const { data, error } = await supabase
       .from("users")
-      .update({
-        name,
-        email,
-        phone,
-        address,
-        profileimg: profileImageUrl,
-      })
+      .update(updatePayload)
       .eq("id", userId)
       .select()
       .single();
+
     if (error) throw new Error(error.message);
 
     return data;
