@@ -42,9 +42,9 @@ export default function Signin() {
 
         if (!error && data?.role) {
           if (data.role === "seller") {
-            navigate("/dashboard/products");
+            navigate("/");
           } else if (data.role === "merchant") {
-            navigate("/products");
+            navigate("/");
           } else {
             navigate("/");
           }
@@ -123,6 +123,7 @@ export default function Signin() {
                   variant="outline"
                   className="w-full"
                   onClick={handlesigninwithgoogle}
+                  disabled
                 >
                   <FcGoogle className="mr-2 size-5" />
                   Sign In with Google

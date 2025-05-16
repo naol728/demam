@@ -19,6 +19,7 @@ import SellerProfile from "./pages/seller/SellerProfile";
 import SellerProductAdd from "./pages/seller/SellerProductAdd";
 import SellerProductEdit from "./pages/seller/SellerProductEdit";
 import SellerProductLayout from "./layout/SellerProductLayout";
+import { DataTableDemo } from "./pages/seller/none";
 
 function App() {
   const dispatch = useDispatch();
@@ -46,12 +47,11 @@ function App() {
         {/* Seller protected routes */}
         <Route element={<Protectedroute role="seller" />}>
           <Route path="/dashboard" element={<SellerLayout />}>
+            <Route path="product/new" element={<SellerProductAdd />} />
             <Route path="products" element={<SellerProductLayout />}>
-              <Route index element={<SellerProducts />} />
-              <Route path="new" element={<SellerProductAdd />} />
+              <Route index element={<DataTableDemo />} />
               <Route path=":id/edit" element={<SellerProductEdit />} />
             </Route>
-
             <Route path="orders" element={<SellerOrders />} />
             <Route path="stats" element={<SellerStats />} />
             <Route path="profile" element={<SellerProfile />} />

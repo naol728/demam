@@ -16,10 +16,14 @@ const signInWithGoogle = async () => {
 };
 
 async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  try {
+    const { error } = await supabase.auth.signOut();
 
-  if (error) {
-    throw new Error(error.message);
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (err) {
+    throw new Error(err.message);
   }
 }
 

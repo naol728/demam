@@ -35,7 +35,6 @@ export const getallProducts = async () => {
 
 export const addnewProduct = async (data) => {
   try {
-    i;
     const { name, description, price, stock_quantity, category_id, image_url } =
       data;
     if (
@@ -166,6 +165,7 @@ export const updateProduct = async (id, data) => {
 
     return updatedProduct;
   } catch (err) {
+    console.log(err);
     throw new Error("Update failed: " + err.message);
   }
 };

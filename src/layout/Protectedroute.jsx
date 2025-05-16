@@ -38,7 +38,13 @@ export default function Protectedroute({ role }) {
     checkUser();
   }, []);
 
-  if (loading) return  <div className="h-dvh"> <Loading /></div>;
+  if (loading)
+    return (
+      <div className="h-dvh">
+        {" "}
+        <Loading />
+      </div>
+    );
 
   if (userRole !== role) {
     return <Navigate to="/" replace />;

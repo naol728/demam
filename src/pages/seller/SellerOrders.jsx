@@ -19,7 +19,6 @@ export default function SellerOrders() {
     queryKey: ["orders"],
     queryFn: () => getOrders(),
   });
-
   console.log(data);
 
   return (
@@ -49,36 +48,42 @@ export default function SellerOrders() {
             </div>
           ) : (
             <>
-              {data?.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">
-                    {order.product.name}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <img
-                      src={order.product.image_url}
-                      alt={order.order.user_id.name}
-                      className="size-10"
-                    />
-                  </TableCell>
-                  <TableCell>{order.order.user_id.name}</TableCell>
-                  <TableCell>
-                    {order.order.user_id.phone
-                      ? order.order.user_id.phone
-                      : "null"}
-                  </TableCell>
-                  <TableCell>
-                    <img
-                      src={order.order.user_id.profileimg}
-                      alt={order.order.user_id.name}
-                      className="size-10"
-                    />
-                  </TableCell>
-                  <TableCell>{order.order.status}</TableCell>
-                  <TableCell>{order.quantity} pices</TableCell>
-                  <TableCell>{formatPrice(order.price)}</TableCell>
+              {data[0].product !== null ? (
+                data?.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">
+                      {order.product.name}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <img
+                        src={order.product.image_url}
+                        alt={order.order.user_id.name}
+                        className="size-10"
+                      />
+                    </TableCell>
+                    <TableCell>{order.order.user_id.name}</TableCell>
+                    <TableCell>
+                      {order.order.user_id.phone
+                        ? order.order.user_id.phone
+                        : "null"}
+                    </TableCell>
+                    <TableCell>
+                      <img
+                        src={order.order.user_id.profileimg}
+                        alt={order.order.user_id.name}
+                        className="size-10"
+                      />
+                    </TableCell>
+                    <TableCell>{order.order.status}</TableCell>
+                    <TableCell>{order.quantity} pices</TableCell>
+                    <TableCell>{formatPrice(order.price)}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow className="flex justify-center items-center">
+                  <TableCell>there is no orders for you</TableCell>
                 </TableRow>
-              ))}
+              )}
             </>
           )}
         </TableBody>

@@ -14,8 +14,8 @@ import {
   BarChart3,
   ChevronDown,
 } from "lucide-react";
-import { Link, useLocation } from "react-router";
-import { useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 import Loading from "@/components/Loading";
 import {
   Collapsible,
@@ -24,10 +24,12 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
+import { signOut } from "@/services/auth";
+import { clearUser } from "@/store/user/userslice";
 
 const navItems = [
   { title: "Products", url: "/dashboard/products", icon: Package },
-  { title: "Add Product", url: "/dashboard/products/new", icon: Package },
+  { title: "Add Product", url: "/dashboard/product/new", icon: Package },
   { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
   { title: "Stats", url: "/dashboard/stats", icon: BarChart3 },
   { title: "Profile", url: "/dashboard/profile", icon: User },
@@ -36,6 +38,14 @@ const navItems = [
 export function AppSidebar() {
   const { user, role, loading } = useSelector((state) => state.user);
   const location = useLocation();
+  const naviagate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handlesignout = async () => {
+    await signOut();
+    dispatch(clearUser());
+    naviagate("/");
+  };
 
   if (loading)
     return (
@@ -105,9 +115,7 @@ export function AppSidebar() {
             <Button
               variant="ghost"
               className="w-full justify-start text-red-500 hover:bg-destructive/10 hover:text-red-600"
-              onClick={() => {
-                // Handle logout
-              }}
+              onClick={handlesignout}
             >
               Logout
             </Button>

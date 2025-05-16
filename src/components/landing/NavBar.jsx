@@ -25,7 +25,8 @@ import {
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import { signOut } from "@/services/auth";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { clearUser } from "@/store/user/userslice";
 
 const NavBar = ({
   logo = {
@@ -55,6 +56,8 @@ const NavBar = ({
   },
 }) => {
   const { user, role, loading } = useSelector((state) => state.user);
+
+  useEffect(() => {}, [user, role, loading]);
 
   return (
     <section className="py-4">
