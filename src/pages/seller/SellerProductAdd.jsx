@@ -44,6 +44,7 @@ export default function SellerProductAdd() {
       navigate("/dashboard/products");
     },
     onError: (err) => {
+      console.log(err);
       toast({
         title: "Error",
         description:

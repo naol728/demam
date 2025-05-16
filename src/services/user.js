@@ -17,7 +17,7 @@ export const updateUser = async (updates) => {
     let profileImageUrl = null;
 
     if (profileimg) {
-      const fileExt = profileimg.name.split(".").pop();
+      const fileExt = profileimg?.name?.split(".").pop();
       const filePath = `avatars/${userId}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
@@ -40,17 +40,19 @@ export const updateUser = async (updates) => {
     const updatePayload = {
       ...(name && { name }),
       ...(email && { email }),
-      ...(profileImageUrl && { profile_image: profileImageUrl }),
+      // ...(profileImageUrl && { profileimg: profileImageUrl }),
     };
 
     if (phone || address) {
-      await supabase
-        .from("profiles")
+      const { data, error } = await supabase
+        .from("users")
         .update({
-          ...(phone && { phone_number: phone }),
+          ...(phone && { phone: phone }),
           ...(address && { address }),
         })
-        .eq("user_id", userId);
+        .eq("id", userId);
+
+      if (error) throw new Error(error.message);
     }
 
     const { data, error } = await supabase
