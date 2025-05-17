@@ -155,10 +155,10 @@ export default function SellerProducts() {
       ),
     },
     {
-      accessorKey: "location",
+      accessorKey: "location_name",
       header: "Location",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("location")}</div>
+        <div className="capitalize">{row.getValue("location_name")}</div>
       ),
     },
     {

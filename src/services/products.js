@@ -35,18 +35,31 @@ export const getallProducts = async () => {
 
 export const addnewProduct = async (data) => {
   try {
-    const { name, description, price, stock_quantity, category_id, image_url } =
-      data;
+    const {
+      name,
+      description,
+      price,
+      stock_quantity,
+      category_id,
+      image_url,
+      location_name,
+      latitude,
+      longitude,
+    } = data;
+
     if (
       !name ||
       !description ||
       !price ||
       !stock_quantity ||
       !category_id ||
-      !image_url
+      !image_url ||
+      !latitude ||
+      !longitude
     ) {
-      throw new Error("please fill all filds ");
+      throw new Error("Please fill all required fields.");
     }
+
     const {
       data: { session },
       error: sessionError,
@@ -89,6 +102,9 @@ export const addnewProduct = async (data) => {
           category_id,
           seller_id: userId,
           image_url: productimgurl,
+          location_name,
+          latitude,
+          longitude,
         },
       ])
       .select();
