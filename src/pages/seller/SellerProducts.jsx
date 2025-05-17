@@ -1,7 +1,25 @@
-// components/SellerProducts.jsx
+import * as React from "react";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
-import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -10,230 +28,324 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { deleteProduct, getallProducts } from "@/services/products";
+import Loading from "@/components/Loading";
+import { Popup } from "@/components/Popup";
+import { usePopup } from "@/hooks/usePopup";
+import { SellerProductEdit } from "./SellerProductEdit";
+import { useDispatch } from "react-redux";
+import { getProductdata, setProductId } from "@/store/products/productsSlice";
 import { useToast } from "@/hooks/use-toast";
-import {
-  getallProducts,
-  getProductById,
-  updateProduct,
-} from "@/services/products";
-import { getCatagories } from "@/services/catagorie";
-import { formatDate, formatPrice } from "@/lib/formater";
+import ProductDetailModal from "./ProductDetail";
 
 export default function SellerProducts() {
-  const queryClient = useQueryClient();
+  const [showDetail, setShowDetail] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] = React.useState(null);
+  const [sorting, setSorting] = React.useState([]);
   const { toast } = useToast();
-  const [editProductId, setEditProductId] = useState(null);
-  const [formState, setFormState] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock_quantity: "",
-    category_id: "",
-    image_url: null,
-  });
-
+  const [columnFilters, setColumnFilters] = React.useState([]);
+  const [columnVisibility, setColumnVisibility] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState({});
+  const { setOpen } = usePopup();
+  const queryClient = useQueryClient();
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => getallProducts(),
   });
-
-  const { data: categories, isLoading: loadingCatagories } = useQuery({
-    queryFn: () => getCatagories(),
-    queryKey: ["catagories"],
-  });
-
-  const { data: productDetail } = useQuery({
-    queryKey: ["product", editProductId],
-    queryFn: () => getProductById(editProductId),
-    enabled: !!editProductId,
-    onSuccess: (data) => {
-      setFormState({
-        name: data.name || "",
-        description: data.description || "",
-        price: data.price || "",
-        stock_quantity: data.stock_quantity || "",
-        category_id: data.category_id || "",
-        image_url: null,
-      });
+  const { mutate } = useMutation({
+    mutationKey: ["productdelete"],
+    mutationFn: (id) => {
+      if (!id) return Promise.reject(new Error("No id provided"));
+      return deleteProduct(id);
     },
-  });
-
-  const { mutate: editProduct, isLoading: isUpdating } = useMutation({
-    mutationFn: (payload) => updateProduct(editProductId, payload),
     onSuccess: () => {
-      toast({ title: "Product updated successfully" });
-      queryClient.invalidateQueries(["products"]);
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({
+        title: "Success",
+        description: "Product Deleted Sucessfully!",
+      });
     },
     onError: (err) => {
       toast({
-        title: "Update failed",
-        description: err.message,
+        title: "Error",
+        description: err.message || "something went wrong!",
         variant: "destructive",
       });
     },
   });
 
-  const handleUpdate = () => {
-    const payload = { ...formState };
-    if (payload.image_url instanceof File) {
-      // handle image upload logic in your updateProduct function
-    }
-    editProduct(payload);
+  const dispatch = useDispatch();
+
+  const handledelete = (id) => {
+    if (!id) return;
+    console.log(id);
+    mutate(id);
   };
-  console.log(editProductId);
+
+  const handleEdit = (id) => {
+    dispatch(setProductId(id));
+    dispatch(getProductdata(id));
+    setOpen(true);
+  };
+  const columns = [
+    {
+      accessorKey: "image_url",
+      header: "Image",
+      cell: ({ row }) => (
+        <div className="capitalize">
+          <img
+            src={row.getValue("image_url")}
+            className="size-10 rounded-md shadow-md"
+          />
+        </div>
+      ),
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("name")}</div>
+      ),
+    },
+    {
+      accessorKey: "price",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Price <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("price"));
+        const formatted = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "ETB",
+        }).format(amount);
+
+        return <div>{formatted}</div>;
+      },
+    },
+    {
+      accessorKey: "stock_quantity",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "des")}
+        >
+          Stock Quantity <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("stock_quantity")} pcs</div>,
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("description")}</div>
+      ),
+    },
+    {
+      accessorKey: "location",
+      header: "Location",
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("location")}</div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const product = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(product.name)}
+              >
+                Copy product Name
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  console.log(product);
+                  setSelectedProduct(product);
+                  setShowDetail(true);
+                }}
+              >
+                Product Detail
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleEdit(product.id)}>
+                Edit product
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handledelete(product.id)}>
+                Delete product
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const table = useReactTable({
+    data: products ?? [],
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
+
+  if (isLoading) return <Loading />;
+
   return (
-    <div className="ml-10">
-      <h2 className="text-center font-semibold text-lg mb-4">Your Products</h2>
-      <Table className="max-w-5xl mx-auto">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Image</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Stock</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Edit</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            <Skeleton className="w-full h-[30px] rounded-full" />
-          ) : (
-            products?.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell>
-                  <img src={p.image_url} className="size-10" alt={p.name} />
-                </TableCell>
-                <TableCell>{p.name}</TableCell>
-                <TableCell>{formatPrice(p.price)}</TableCell>
-                <TableCell>{p.description}</TableCell>
-                <TableCell>{p.stock_quantity}</TableCell>
-                <TableCell>{p.category?.name}</TableCell>
-                <TableCell>{formatDate(p.created_at)}</TableCell>
-                <TableCell>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button
-                        onClick={() => setEditProductId(p.id)}
-                        variant="outline"
-                      >
-                        Edit
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                      <SheetHeader>
-                        <SheetTitle>Edit Product</SheetTitle>
-                        <SheetDescription>
-                          Update your product details below
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="grid gap-4 py-4">
-                        <Label>Name</Label>
-                        <Input
-                          value={formState.name}
-                          onChange={(e) =>
-                            setFormState({ ...formState, name: e.target.value })
-                          }
-                        />
-                        <Label>Description</Label>
-                        <Input
-                          value={formState.description}
-                          onChange={(e) =>
-                            setFormState({
-                              ...formState,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                        <Label>Price</Label>
-                        <Input
-                          type="number"
-                          value={formState.price}
-                          onChange={(e) =>
-                            setFormState({
-                              ...formState,
-                              price: e.target.value,
-                            })
-                          }
-                        />
-                        <Label>Stock Quantity</Label>
-                        <Input
-                          type="number"
-                          value={formState.stock_quantity}
-                          onChange={(e) =>
-                            setFormState({
-                              ...formState,
-                              stock_quantity: e.target.value,
-                            })
-                          }
-                        />
-                        <Label>Category</Label>
-                        <Select
-                          value={formState.category_id}
-                          onValueChange={(val) =>
-                            setFormState({ ...formState, category_id: val })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories?.data?.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Label>Image</Label>
-                        <Input
-                          type="file"
-                          onChange={(e) =>
-                            setFormState({
-                              ...formState,
-                              image_url: e.target.files[0],
-                            })
-                          }
-                        />
-                      </div>
-                      <SheetFooter>
-                        <SheetClose asChild>
-                          <Button disabled={isUpdating} onClick={handleUpdate}>
-                            {isUpdating ? "Saving..." : "Save Changes"}
-                          </Button>
-                        </SheetClose>
-                      </SheetFooter>
-                    </SheetContent>
-                  </Sheet>
+    <div className="max-w-5xl mx-auto">
+      <ProductDetailModal
+        isOpen={showDetail}
+        onClose={() => setShowDetail(false)}
+        product={selectedProduct}
+      />
+
+      <Popup title={"Edit the Product"}>
+        <SellerProductEdit />
+      </Popup>
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter Products..."
+          value={table.getColumn("name")?.getFilterValue() ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} row
+        </div>
+        {/* <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div> */}
+      </div>
     </div>
   );
 }

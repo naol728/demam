@@ -17,9 +17,7 @@ import SellerOrders from "./pages/seller/SellerOrders";
 import SellerStats from "./pages/seller/SellerStats";
 import SellerProfile from "./pages/seller/SellerProfile";
 import SellerProductAdd from "./pages/seller/SellerProductAdd";
-import SellerProductEdit from "./pages/seller/SellerProductEdit";
 import SellerProductLayout from "./layout/SellerProductLayout";
-import { DataTableDemo } from "./pages/seller/none";
 
 function App() {
   const dispatch = useDispatch();
@@ -49,8 +47,7 @@ function App() {
           <Route path="/dashboard" element={<SellerLayout />}>
             <Route path="product/new" element={<SellerProductAdd />} />
             <Route path="products" element={<SellerProductLayout />}>
-              <Route index element={<DataTableDemo />} />
-              <Route path=":id/edit" element={<SellerProductEdit />} />
+              <Route index element={<SellerProducts />} />
             </Route>
             <Route path="orders" element={<SellerOrders />} />
             <Route path="stats" element={<SellerStats />} />
