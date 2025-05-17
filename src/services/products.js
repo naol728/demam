@@ -109,10 +109,10 @@ export const updateProduct = async (id, data) => {
       price,
       stock_quantity,
       category_id,
-      image_url, // this could be a File or a string (existing URL)
+      image_url, // can be File or string (URL)
     } = data;
 
-    // Get current session to fetch user ID
+    // 1. Get current session
     const {
       data: { session },
       error: sessionError,
@@ -125,7 +125,7 @@ export const updateProduct = async (id, data) => {
 
     let finalImageUrl = image_url;
 
-    // If a new file is uploaded
+    // 2. Upload new image if it's a File
     if (image_url instanceof File) {
       const fileExt = image_url.name.split(".").pop();
       const filePath = `products/${userId}-${Date.now()}.${fileExt}`;
@@ -145,7 +145,7 @@ export const updateProduct = async (id, data) => {
       finalImageUrl = publicUrl;
     }
 
-    // Update the product by ID
+    // 3. Update the product
     const { data: updatedProduct, error: updateError } = await supabase
       .from("products")
       .update({
@@ -155,21 +155,22 @@ export const updateProduct = async (id, data) => {
         stock_quantity,
         category_id,
         image_url: finalImageUrl,
-        updated_at: new Date(),
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .eq("seller_id", userId) // security: make sure user is the owner
+      .eq("seller_id", userId) // security check
       .select();
 
     if (updateError) throw new Error(updateError.message);
+    if (!updatedProduct || updatedProduct.length === 0)
+      throw new Error("No product was updated");
 
-    return updatedProduct;
+    return updatedProduct[0]; // Return the single updated product
   } catch (err) {
-    console.log(err);
+    console.error("UpdateProduct Error:", err);
     throw new Error("Update failed: " + err.message);
   }
 };
-
 export const getProductById = async (productId) => {
   try {
     const { data, error } = await supabase
@@ -183,6 +184,24 @@ export const getProductById = async (productId) => {
     }
 
     return data;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+export const deleteProduct = async (productId) => {
+  try {
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId);
+
+    if (error) {
+      console.error("Failed to delete product:", error.message);
+      throw new Error(error.message);
+    }
+
+    return { success: true, message: "Product deleted successfully." };
   } catch (err) {
     throw new Error(err.message);
   }
