@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import supabase from "@/services/supabase";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,32 +16,32 @@ import { updateUser } from "@/services/user";
 export default function SellerProfile() {
   const { toast } = useToast();
   const { user, loading } = useSelector((state) => state.user);
-  const [profileimg, setProfileImg] = useState();
-  const { mutate } = useMutation({
+  const [profileimg, setProfileImg] = useState(null);
+  const dispatch = useDispatch();
+
+  const { mutate, isPending } = useMutation({
     mutationKey: ["user"],
     mutationFn: (updateduserdata) => updateUser(updateduserdata),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      dispatch(setUser(data));
       toast({
         title: "Success",
-        description: "sucessfuly updated",
+        description: "Successfully updated your profile.",
       });
+      setProfileImg(null); // clear selected file
     },
     onError: (err) => {
       toast({
         title: "Error",
-        description:
-          err?.message || "An unexpected error occurred during sign up.",
+        description: err?.message || "An error occurred while updating.",
         variant: "destructive",
       });
     },
   });
-  const dispatch = useDispatch();
+
   const handleUpdate = () => {
     let updateduserdata = { ...user };
-
-    if (profileimg) updateduserdata = { ...user, profileimg };
-
-    console.log(updateduserdata);
+    if (profileimg) updateduserdata.profileimg = profileimg;
     mutate(updateduserdata);
   };
 
@@ -49,6 +49,7 @@ export default function SellerProfile() {
     const { name, value } = e.target;
     dispatch(setUser({ name, value }));
   };
+
   if (loading)
     return (
       <div className="flex flex-col space-y-3">
@@ -59,6 +60,7 @@ export default function SellerProfile() {
         </div>
       </div>
     );
+
   return (
     <section className="py-12">
       <div className="container max-w-xl mx-auto">
@@ -68,51 +70,55 @@ export default function SellerProfile() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              <div className="flex justify-center items-center ">
+              <div className="flex justify-center items-center">
                 <Avatar className="size-40">
                   <AvatarImage src={user.profileimg} alt="Profile image" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
               </div>
+
               <div>
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
                   name="name"
-                  value={user.name}
+                  value={user.name || ""}
                   onChange={handleChange}
                 />
               </div>
+
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
-                  value={user.email}
+                  value={user.email || ""}
                   onChange={handleChange}
                 />
               </div>
+
               <div>
-                <Label htmlFor="phone_number">Phone Number</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input
                   id="phone"
                   name="phone"
-                  value={user.phone}
+                  value={user.phone || ""}
                   onChange={handleChange}
                 />
               </div>
+
               <div>
                 <Label htmlFor="address">Address</Label>
                 <Input
                   id="address"
                   name="address"
-                  value={user.address}
-                  // disabled={!editing}
+                  value={user.address || ""}
                   onChange={handleChange}
                 />
               </div>
+
               <div>
-                <label className="block mb-1">Profile Image</label>
+                <Label className="block mb-1">Profile Image</Label>
                 <Input
                   type="file"
                   accept="image/*"
@@ -122,11 +128,8 @@ export default function SellerProfile() {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                onClick={handleUpdate}
-                // disabled={loading}
-              >
+              <Button type="button" onClick={handleUpdate} disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save
               </Button>
             </div>

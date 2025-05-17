@@ -27,15 +27,34 @@ export default function SellerProductAdd() {
   const [stockQuantity, setStockQuantity] = useState(0);
   const [categoryId, setCategoryId] = useState("");
   const [productimg, setProductimg] = useState();
+  const [locationName, setLocationName] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+
+  const handleGetLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude.toString());
+        setLongitude(position.coords.longitude.toString());
+      },
+      (err) => {
+        toast({
+          title: "Error",
+          description: "Failed to get location: " + err.message,
+          variant: "destructive",
+        });
+      }
+    );
+  };
 
   const { data: categories, isLoading: loadingCatagories } = useQuery({
     queryFn: () => getCatagories(),
     queryKey: ["catagories"],
   });
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: (data) => addnewProduct(data),
-    mutationKey: ["add product"],
+    mutationKey: ["addproduct"],
     onSuccess: () => {
       toast({
         title: "Success",
@@ -64,7 +83,11 @@ export default function SellerProductAdd() {
       stock_quantity: parseInt(stockQuantity),
       category_id: categoryId,
       image_url: productimg,
+      location_name: locationName,
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
     };
+
     await mutate(data);
   };
 
@@ -161,9 +184,46 @@ export default function SellerProductAdd() {
               </p>
             )}
           </div>
+          <div>
+            <Label htmlFor="locationName">Location Name</Label>
+            <Input
+              id="locationName"
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              placeholder="e.g. Addis Ababa"
+            />
+          </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Adding Product..." : "Add Product"}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="latitude">Latitude</Label>
+              <Input
+                id="latitude"
+                type="text"
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
+                placeholder="e.g. 9.03"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="longitude">Longitude</Label>
+              <Input
+                id="longitude"
+                type="text"
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+                placeholder="e.g. 38.74"
+              />
+            </div>
+          </div>
+
+          <Button type="button" onClick={handleGetLocation}>
+            📍 Get My Location
+          </Button>
+
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Adding Product..." : "Add Product"}
           </Button>
         </form>
       </CardContent>

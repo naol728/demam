@@ -16,15 +16,13 @@ export const updateUser = async (updates) => {
 
     let profileImageUrl = null;
 
-    if (profileimg) {
-      const fileExt = profileimg?.name?.split(".").pop();
+    if (profileimg && profileimg.name) {
+      const fileExt = profileimg.name.split(".").pop();
       const filePath = `avatars/${userId}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, profileimg, {
-          upsert: true,
-        });
+        .upload(filePath, profileimg, { upsert: true });
 
       if (uploadError) {
         throw new Error("Image upload failed: " + uploadError.message);
@@ -40,20 +38,10 @@ export const updateUser = async (updates) => {
     const updatePayload = {
       ...(name && { name }),
       ...(email && { email }),
-      // ...(profileImageUrl && { profileimg: profileImageUrl }),
+      ...(phone && { phone }),
+      ...(address && { address }),
+      ...(profileImageUrl && { profileimg: profileImageUrl }),
     };
-
-    if (phone || address) {
-      const { data, error } = await supabase
-        .from("users")
-        .update({
-          ...(phone && { phone: phone }),
-          ...(address && { address }),
-        })
-        .eq("id", userId);
-
-      if (error) throw new Error(error.message);
-    }
 
     const { data, error } = await supabase
       .from("users")
@@ -66,6 +54,7 @@ export const updateUser = async (updates) => {
 
     return data;
   } catch (err) {
+    console.log(err);
     throw new Error(err.message);
   }
 };
