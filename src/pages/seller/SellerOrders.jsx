@@ -1,99 +1,211 @@
-import { getOrders } from "@/services/orders";
+import * as React from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
 import {
   Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, ArrowUpDown } from "lucide-react";
+import { getOrders } from "@/services/orders";
 import { formatPrice } from "@/lib/formater";
+import Loading from "@/components/Loading";
 
 export default function SellerOrders() {
-  const { data, isLoading } = useQuery({
+  const { data: orders, isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: () => getOrders(),
   });
-  console.log(data);
+
+  const [sorting, setSorting] = React.useState([]);
+  const [columnFilters, setColumnFilters] = React.useState([]);
+  const [columnVisibility, setColumnVisibility] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState({});
+
+  const columns = [
+    {
+      accessorKey: "location",
+      header: () => <div className="font-bold">Order Location</div>,
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("location")}</div>
+      ),
+    },
+    {
+      accessorFn: (row) => row.user?.name,
+      id: "user_name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          User Name <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => row.original.user?.name || "Unknown",
+    },
+
+    {
+      accessorKey: "user.email",
+      header: "User Email",
+      cell: ({ row }) => row.original.user?.email || "N/A",
+    },
+    {
+      accessorKey: "tracking_status",
+      header: "Tracking Status",
+      cell: ({ row }) => row.getValue("tracking_status"),
+    },
+    {
+      accessorKey: "status",
+      header: "Order Status",
+      cell: ({ row }) => row.getValue("status"),
+    },
+    {
+      accessorKey: "order_items",
+      header: "Quantity",
+      cell: ({ row }) => `${row.original.order_items.length} items`,
+    },
+    {
+      accessorKey: "total_amount",
+      header: "Amount",
+      cell: ({ row }) => formatPrice(row.getValue("total_amount")),
+    },
+  ];
+
+  const table = useReactTable({
+    data: orders ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
+
+  const handleorderdetail = (id) => {
+
+    
+    console.log(id.row.original.id);
+  };
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="max-w-5xl mx-auto mt-10">
-      <Table>
-        <TableCaption>A list of Recived Orders.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Order Name</TableHead>
-            <TableHead>Order Image</TableHead>
-            <TableHead>User Name</TableHead>
-            <TableHead>User Phone</TableHead>
-            <TableHead>User Image</TableHead>
-            <TableHead>Order Status</TableHead>
-            <TableHead>Order Quantity</TableHead>
-            <TableHead>Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
-            </div>
-          ) : (
-            <>
-              {data[0].product !== null ? (
-                data?.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">
-                      {order.product.name}
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter by user name..."
+          value={table.getColumn("user_name")?.getFilterValue() ?? ""}
+          onChange={(event) =>
+            table.getColumn("user_name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      onClick={() => handleorderdetail(cell)}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
-                    <TableCell className="font-medium">
-                      <img
-                        src={order.product.image_url}
-                        alt={order.order.user_id.name}
-                        className="size-10"
-                      />
-                    </TableCell>
-                    <TableCell>{order.order.user_id.name}</TableCell>
-                    <TableCell>
-                      {order.order.user_id.phone
-                        ? order.order.user_id.phone
-                        : "null"}
-                    </TableCell>
-                    <TableCell>
-                      <img
-                        src={order.order.user_id.profileimg}
-                        alt={order.order.user_id.name}
-                        className="size-10"
-                      />
-                    </TableCell>
-                    <TableCell>{order.order.status}</TableCell>
-                    <TableCell>{order.quantity} pices</TableCell>
-                    <TableCell>{formatPrice(order.price)}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow className="flex justify-center items-center">
-                  <TableCell>there is no orders for you</TableCell>
+                  ))}
                 </TableRow>
-              )}
-            </>
-          )}
-        </TableBody>
-        {/* <TableFooter>
-          <TableRow>
-            <TableCell colSpan={3}>Total</TableCell>
-            <TableCell className="text-right">$2,500.00</TableCell>
-          </TableRow>
-        </TableFooter> */}
-      </Table>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center h-24"
+                >
+                  No orders found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-sm text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} order(s)
+        </div>
+      </div>
     </div>
   );
 }

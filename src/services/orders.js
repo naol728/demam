@@ -13,38 +13,34 @@ export const getOrders = async () => {
     if (!userId) throw new Error("User ID not found");
 
     const { data, error } = await supabase
-      .from("order_items")
+      .from("orders")
       .select(
         `
+    *,
+    user:user_id (
       id,
+      name,
+      email,
+      phone
+    ),
+    order_items (
       quantity,
       price,
-      order:order_id (
-        id,
-        user_id:users(
-           name,
-           email,
-           profileimg,
-           phone
-        ),
-        total_amount,
-        status,
-        created_at
-      ),
       product:product_id (
         id,
         name,
-        image_url,
-        seller_id
+        image_url
       )
-    `
+    )
+  `
       )
-      .eq("product.seller_id", userId);
+      .eq("seller_id", userId);
 
     if (error) {
       console.error("Failed to fetch seller orders:", error.message);
       throw new Error(error.message);
     }
+    console.log(data);
 
     return data;
   } catch (err) {
