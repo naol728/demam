@@ -1,6 +1,6 @@
 import supabase from "./supabase";
 
-export const getAllproductstobuyer = async () => {
+export const getAllproductstobuyer = async (page = 1, limit = 10) => {
   try {
     const {
       data: { session },
@@ -12,22 +12,42 @@ export const getAllproductstobuyer = async () => {
     const userId = session?.user?.id;
     if (!userId) throw new Error("User ID not found");
 
-    const { data, error: fetchError } = await supabase.from("products").select(
-      `
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const {
+      data,
+      error: fetchError,
+      count,
+    } = await supabase
+      .from("products")
+      .select(
+        `
         *,
         user:seller_id (
           id,
-          name
+          name,
+          phone,
+          email
         ),
         catagory:category_id(
-        name
+          name
         )
-      `
-    );
+      `,
+        { count: "exact" }
+      )
+      .range(from, to)
+      .order("created_at", { ascending: false });
 
     if (fetchError) throw new Error(fetchError.message);
 
-    return data;
+    return {
+      data,
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit),
+    };
   } catch (err) {
     throw new Error(err.message);
   }

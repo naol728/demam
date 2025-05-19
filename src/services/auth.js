@@ -71,7 +71,6 @@ const signupuser = async (data) => {
   const { email, password, role, profileimg, name, phone } = data;
 
   try {
-    // 1. Create the user in Supabase Auth
     const { data: signupData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -82,7 +81,6 @@ const signupuser = async (data) => {
     }
 
     const userId = signupData?.user?.id;
-
     let profileImageUrl = null;
 
     if (profileimg) {
@@ -97,7 +95,6 @@ const signupuser = async (data) => {
         throw new Error("Image upload failed: " + uploadError.message);
       }
 
-      // Get public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
@@ -113,7 +110,7 @@ const signupuser = async (data) => {
           email,
           role,
           userid: userId,
-          profileimg: profileImageUrl, // Save the image URL
+          profileimg: profileImageUrl,
           name,
           password,
           phone,
@@ -123,6 +120,14 @@ const signupuser = async (data) => {
 
     if (insertError) {
       throw new Error(insertError.message);
+    }
+
+    const { error: cartError } = await supabase
+      .from("carts")
+      .insert([{ user_id: userId }]);
+
+    if (cartError) {
+      throw new Error("Cart creation failed: " + cartError.message);
     }
 
     return { success: true, userData };

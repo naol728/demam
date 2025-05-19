@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import {
   ArrowUpFromLine,
@@ -17,11 +17,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { signOut } from "@/services/auth";
+import { clearUser } from "@/store/user/userslice";
 
 export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
+  const naviagate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handlesignout = async () => {
+    await signOut();
+    dispatch(clearUser());
+    naviagate("/");
+  };
 
   return (
     <nav className=" shadow-md px-4 py-1 w-full fixed bg-background/80 ">
@@ -65,10 +75,7 @@ export default function NavBar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => {
-                  // Handle logout
-                  console.log("Logging out...");
-                }}
+                onClick={handlesignout}
                 className="flex items-center gap-2"
               >
                 <LogOut />
