@@ -19,6 +19,7 @@ import SellerProfile from "./pages/seller/SellerProfile";
 import SellerProductAdd from "./pages/seller/SellerProductAdd";
 import SellerProductLayout from "./layout/SellerProductLayout";
 import SellerOrderDetail from "./pages/seller/SellerOrderDetail";
+import BuyerLayout from "./layout/BuyerLayout";
 
 function App() {
   const dispatch = useDispatch();
@@ -37,9 +38,11 @@ function App() {
 
         {/* Merchant protected routes */}
         <Route element={<Protectedroute role="merchant" />}>
-          <Route path="/products" element={<Products />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route element={<BuyerLayout />}>
+            <Route path="/products" element={<Products />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/carts" element={<Cart />} />
+          </Route>
           <Route path="/profile" element={<Profile />} />
         </Route>
 
