@@ -1,5 +1,38 @@
 import supabase from "./supabase";
 
+export const getAllproductstobuyer = async () => {
+  try {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) throw new Error(error.message);
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("User ID not found");
+
+    const { data, error: fetchError } = await supabase.from("products").select(
+      `
+        *,
+        user:seller_id (
+          id,
+          name
+        ),
+        catagory:category_id(
+        name
+        )
+      `
+    );
+
+    if (fetchError) throw new Error(fetchError.message);
+
+    return data;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
 export const getallProducts = async () => {
   try {
     const {

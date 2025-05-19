@@ -28,6 +28,7 @@ import { ChevronDown, ArrowUpDown } from "lucide-react";
 import { getOrders } from "@/services/orders";
 import { formatPrice } from "@/lib/formater";
 import Loading from "@/components/Loading";
+import { useNavigate } from "react-router";
 
 export default function SellerOrders() {
   const { data: orders, isLoading } = useQuery({
@@ -108,10 +109,11 @@ export default function SellerOrders() {
     },
   });
 
-  const handleorderdetail = (id) => {
+  const navigate = useNavigate();
 
-    
-    console.log(id.row.original.id);
+  const handleorderdetail = (id) => {
+    if (!id.row.original.id) return;
+    navigate(`/dashboard/orders/${id.row.original.id}`);
   };
 
   if (isLoading) return <Loading />;
