@@ -57,8 +57,6 @@ const NavBar = ({
 }) => {
   const { user, role, loading } = useSelector((state) => state.user);
 
-  useEffect(() => {}, [user, role, loading]);
-
   return (
     <section className="py-4">
       <div className="container">

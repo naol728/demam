@@ -6,10 +6,11 @@ import { useMutation } from "@tanstack/react-query";
 import { signInWithGoogle, signinUser } from "@/services/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Link, Navigate } from "react-router";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import supabase from "../../services/supabase";
 import { GalleryVerticalEnd } from "lucide-react";
+import { fetchUser } from "@/store/user/userslice";
 
 export default function Signin() {
   const { toast } = useToast();
@@ -18,6 +19,7 @@ export default function Signin() {
   const { user, Loading } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [roleChecked, setRoleChecked] = useState(false);
+  const diaptch = useDispatch();
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (data) => signinUser(data),
@@ -27,34 +29,7 @@ export default function Signin() {
         title: "Sign in successful",
         description: "You have successfully signed in!",
       });
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const userId = session?.user?.id;
-
-      if (userId) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("role")
-          .eq("id", userId)
-          .single();
-
-        if (!error && data?.role) {
-          if (data.role === "seller") {
-            navigate("/");
-          } else if (data.role === "merchant") {
-            navigate("/");
-          } else {
-            navigate("/");
-          }
-        } else {
-          navigate("/"); // fallback
-        }
-      }
-
-      setRoleChecked(true);
+      diaptch(fetchUser());
     },
     onError: (err) => {
       toast({
