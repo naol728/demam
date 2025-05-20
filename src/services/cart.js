@@ -83,7 +83,13 @@ export async function getallcartstobuyer() {
 
     const { data: cart_items, error } = await supabase
       .from("cart_items")
-      .select("*")
+      .select(
+        `*,product:product_id(
+        id,
+        name,
+        price,
+        image_url)`
+      )
       .eq("cart_id", cart.id);
 
     if (error) throw new Error(error.message);

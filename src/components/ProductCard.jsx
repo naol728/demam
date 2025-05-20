@@ -26,6 +26,7 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
     mutationKey: ["cart-add", product.id],
     mutationFn: () => addToCart(product.id),
     onSuccess: () => {
+      queryClient.invalidateQueries(["cart_items", "products"]);
       toast({ title: "Success", description: "Product added to cart." });
     },
     onError: (err) => {
@@ -40,7 +41,7 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
   const { mutate: updateCartMutate, isPending: isUpdating } = useMutation({
     mutationFn: ({ id, op }) => addcartitemquantity(id, op),
     onSuccess: () => {
-      queryClient.invalidateQueries(["cart_items"]);
+      queryClient.invalidateQueries(["cart_items", "products"]);
       toast({ title: "Success", description: "Cart updated." });
     },
     onError: (err) => {
@@ -55,7 +56,7 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
   const { mutate: deleteCartMutate, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteCartItem(product.id),
     onSuccess: () => {
-      queryClient.invalidateQueries(["cart_items"]);
+      queryClient.invalidateQueries(["cart_items", "products"]);
       toast({ title: "Removed", description: "Product removed from cart." });
     },
     onError: (err) => {
