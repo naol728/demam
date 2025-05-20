@@ -5,7 +5,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAllproductstobuyer } from "@/services/products";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useSelector } from "react-redux";
+import { getallcartstobuyer } from "@/services/cart";
 
 export default function Products() {
   const { user } = useSelector((state) => state.user);
@@ -38,9 +39,23 @@ export default function Products() {
         return undefined;
       },
     });
+  const {
+    data: cart_items,
+    error: cart_itemserr,
+    isLoading: cartitemsloading,
+  } = useQuery({
+    queryKey: ["cart_items"],
+    queryFn: () => getallcartstobuyer(),
+  });
+  console.log(cart_items);
 
   const allProducts = data?.pages.flatMap((page) => page.data) || [];
-
+  const isInCart = (productId) => {
+    return cart_items?.some((item) => item.product_id === productId);
+  };
+  const inCartQunetity = (productid) => {
+    return cart_items?.find((item) => item.product_id === productid);
+  };
   const filteredProducts = useMemo(() => {
     let filtered = allProducts.filter(
       (product) =>
@@ -142,11 +157,22 @@ export default function Products() {
             if (index === filteredProducts.length - 1) {
               return (
                 <div key={product.id} ref={lastProductRef}>
-                  <ProductCard product={product} />
+                  <ProductCard
+                    product={product}
+                    isInCart={isInCart}
+                    inCartQunetity={inCartQunetity}
+                  />
                 </div>
               );
             }
-            return <ProductCard key={product.id} product={product} />;
+            return (
+              <ProductCard
+                key={product.id}
+                product={product}
+                isInCart={isInCart}
+                inCartQunetity={inCartQunetity}
+              />
+            );
           })}
         </div>
       ) : (

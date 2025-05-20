@@ -28,7 +28,8 @@ export const getAllproductstobuyer = async (page = 1, limit = 10) => {
           id,
           name,
           phone,
-          email
+          email,
+          profileimg
         ),
         catagory:category_id(
           name
