@@ -60,14 +60,31 @@ export default function ProductDetailModal({ isOpen, onClose, product }) {
 
           {product.user && (
             <div className="text-sm space-y-1">
-              <div>
+              <div className="flex items-center gap-2">
                 <strong>Seller:</strong> {product.user.name}
+                <img
+                  src={product.user.profileimg}
+                  className="size-10 rounded-full shadow-md"
+                  alt={product.user.name}
+                />
               </div>
-              <div className="text-muted-foreground">
-                📞 {product.user.phone}
+              <div className="text-muted-foreground cursor-pointer">
+                📞
+                <a
+                  href={`tel:${product.user.phone}`}
+                  className="hover:underline"
+                >
+                  {product.user.phone}
+                </a>
               </div>
               <div className="text-muted-foreground truncate">
-                ✉️ {product.user.email}
+                ✉️
+                <a
+                  href={`mailto:${product.user.email}`}
+                  className="hover:underline"
+                >
+                  {product.user.email}
+                </a>
               </div>
             </div>
           )}

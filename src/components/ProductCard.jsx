@@ -9,38 +9,66 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/formater";
 import { useState } from "react";
 import ProductDetailModal from "@/pages/seller/ProductDetail";
-import { addToCart } from "@/services/cart";
-import { useMutation } from "@tanstack/react-query";
+import {
+  addcartitemquantity,
+  addToCart,
+  deleteCartItem,
+} from "@/services/cart";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { Minus, Plus, Trash } from "lucide-react";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, isInCart, inCartQunetity }) {
   const [showDetail, setShowDetail] = useState(false);
   const { toast } = useToast();
-
-  const { mutate, isPending } = useMutation({
-    mutationKey: ["products"],
-    mutationFn: (id) => addToCart(id),
+  const queryClient = useQueryClient();
+  const { mutate: addCartMutate, isPending: isAdding } = useMutation({
+    mutationKey: ["cart-add", product.id],
+    mutationFn: () => addToCart(product.id),
     onSuccess: () => {
-      toast({
-        title: "Sucesss",
-        description: "product added to cart sucessfully",
-      });
+      toast({ title: "Success", description: "Product added to cart." });
     },
     onError: (err) => {
       toast({
         title: "Error",
-        description: err.message || "somthing is wrong",
+        description: err.message || "Something went wrong",
         variant: "destructive",
       });
     },
   });
-  const handleaddtocart = (id) => {
-    if (!id) return;
-    mutate(id);
-  };
+
+  const { mutate: updateCartMutate, isPending: isUpdating } = useMutation({
+    mutationFn: ({ id, op }) => addcartitemquantity(id, op),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["cart_items"]);
+      toast({ title: "Success", description: "Cart updated." });
+    },
+    onError: (err) => {
+      toast({
+        title: "Error",
+        description: err.message || "Something went wrong",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutate: deleteCartMutate, isPending: isDeleting } = useMutation({
+    mutationFn: () => deleteCartItem(product.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["cart_items"]);
+      toast({ title: "Removed", description: "Product removed from cart." });
+    },
+    onError: (err) => {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to remove item",
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
-    <Card className="w-full max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow h-max  border rounded-lg">
+    <Card className="w-full max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow border rounded-lg">
       <ProductDetailModal
         isOpen={showDetail}
         onClose={() => setShowDetail(false)}
@@ -51,7 +79,7 @@ export default function ProductCard({ product }) {
         <img
           src={product.image_url}
           alt={product.name}
-          className="w-full h-80  object-cover rounded-t-lg"
+          className="w-full h-80 object-cover rounded-t-lg"
         />
       </CardHeader>
 
@@ -70,9 +98,9 @@ export default function ProductCard({ product }) {
           </span>
         </div>
 
-        <div className="text-sm font-medium ">{formatPrice(product.price)}</div>
+        <div className="text-sm font-medium">{formatPrice(product.price)}</div>
 
-        <div className="space-y-1 mt-1 text-xs ">
+        <div className="space-y-1 mt-1 text-xs">
           <div>
             <span className="font-medium">Category:</span>{" "}
             <span>{product?.catagory?.name || "Unknown"}</span>
@@ -97,14 +125,49 @@ export default function ProductCard({ product }) {
         >
           View Detail
         </Button>
-        <Button
-          disabled={!product.stock_quantity > 0 || isPending}
-          size="sm"
-          className="w-full"
-          onClick={() => handleaddtocart(product.id)}
-        >
-          {isPending ? "Adding to Cart" : " Add to Cart"}
-        </Button>
+
+        {isInCart(product.id) ? (
+          <>
+            <div className="text-xs font-mono font-bold">
+              items: {inCartQunetity(product.id)?.quantity} {product.name}
+            </div>
+            <div className="flex justify-between w-full items-center space-x-1">
+              <Button
+                disabled={!product.stock_quantity || isUpdating}
+                variant="outline"
+                size="icon"
+                onClick={() => updateCartMutate({ id: product.id, op: "dec" })}
+              >
+                <Minus />
+              </Button>
+              <Button
+                disabled={isDeleting}
+                variant="destructive"
+                size="icon"
+                onClick={() => deleteCartMutate()}
+              >
+                <Trash />
+              </Button>
+              <Button
+                disabled={!product.stock_quantity || isUpdating}
+                variant="outline"
+                size="icon"
+                onClick={() => updateCartMutate({ id: product.id, op: "inc" })}
+              >
+                <Plus />
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button
+            disabled={!product.stock_quantity || isAdding}
+            size="sm"
+            className="w-full"
+            onClick={() => addCartMutate()}
+          >
+            {isAdding ? "Adding..." : "Add to Cart"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
