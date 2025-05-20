@@ -31,7 +31,7 @@ export default function SignUp() {
         title: "Sign up successful",
         description: "You have successfully signed up!",
       });
-      diaptch(fetchUser());
+      dispatch(fetchUser());
       navigate("/");
     },
     onError: (err) => {
