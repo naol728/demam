@@ -102,11 +102,11 @@ export default function NavBar() {
 
       {/* Mobile Links */}
       {menuOpen && (
-        <div className="md:hidden mt-2 space-y-2 text-center">
+        <div className="md:hidden mt-2 space-y-2 text-center z-50  bg-black">
           <Link to="/products" className="block text-base py-2 ">
             Products
           </Link>
-          <Link to="/cart" className="block text-base py-2 ">
+          <Link to="/carts" className="block text-base py-2 ">
             Cart
           </Link>
           <Link to="/orders" className="block text-base py-2 ">

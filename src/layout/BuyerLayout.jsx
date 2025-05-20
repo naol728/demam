@@ -9,7 +9,7 @@ export default function BuyerLayout() {
       <header>
         <NavBar />
       </header>
-      <main className="pt-20">
+      <main className="pt-20 max-w-5xl mx-auto">
         <Outlet />
         <Toaster />
       </main>
