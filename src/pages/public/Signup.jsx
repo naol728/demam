@@ -7,8 +7,9 @@ import { signupuser } from "@/services/auth";
 import Loading from "@/components/Loading";
 import { useToast } from "@/hooks/use-toast";
 import { Link, Navigate, useNavigate } from "react-router";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GalleryVerticalEnd } from "lucide-react";
+import { fetchUser, setUser } from "@/store/user/userslice";
 
 export default function SignUp() {
   const { toast } = useToast();
@@ -20,17 +21,18 @@ export default function SignUp() {
   const [phone, setPhone] = useState("");
   const { user, Loading } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (data) => signupuser(data),
     mutationKey: ["auth"],
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Sign up successful",
         description: "You have successfully signed up!",
       });
+      diaptch(fetchUser());
       navigate("/");
-      console.log(data);
     },
     onError: (err) => {
       toast({

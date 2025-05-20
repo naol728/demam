@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 
 const Hero = () => {
   const { user, role, loading } = useSelector((state) => state.user);
-  console.log(role, user);
+
   return (
     <section className="py-4">
       <div className="container">
