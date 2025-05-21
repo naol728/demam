@@ -20,6 +20,7 @@ import SellerProductAdd from "./pages/seller/SellerProductAdd";
 import SellerProductLayout from "./layout/SellerProductLayout";
 import SellerOrderDetail from "./pages/seller/SellerOrderDetail";
 import BuyerLayout from "./layout/BuyerLayout";
+import CreateOrder from "./pages/merchant/CreateOrder";
 
 function App() {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/carts" element={<Cart />} />
+            <Route path="/createorder" element={<CreateOrder />} />
           </Route>
           <Route path="/profile" element={<Profile />} />
         </Route>
