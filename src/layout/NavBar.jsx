@@ -34,7 +34,7 @@ export default function NavBar() {
   };
 
   return (
-    <nav className=" shadow-md px-4 py-1 w-full fixed bg-background/80 ">
+    <nav className=" shadow-md px-4 py-1 w-full fixed bg-background/80 z-50 ">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
