@@ -21,13 +21,13 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router";
 import { Minus, Plus, Trash } from "lucide-react";
-import Checkout from "./ChapaCheckout";
-import ChapaCheckout from "./ChapaCheckout";
+import { useSelector } from "react-redux";
+import CreateOrder from "./CreateOrder";
 
 export default function Cart() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useSelector((state) => state.user);
 
-  const navigate = useNavigate();
   const { data: carts, isLoading } = useQuery({
     queryFn: () => getallcartstobuyer(),
     queryKey: ["carts_item"],
@@ -73,9 +73,7 @@ export default function Cart() {
     },
   });
 
-  const handleCheckout = () => {
-    navigate("/checkout");
-  };
+  const tx_ref = "tx-" + Date.now();
 
   if (isLoading) {
     return (
@@ -95,6 +93,7 @@ export default function Cart() {
 
   return (
     <div className="max-w-5xl mx-auto mt-10 px-4">
+      <CreateOrder totalPrice={totalPrice} />
       {carts.length > 0 ? (
         <>
           <div className="mb-4">
@@ -175,21 +174,62 @@ export default function Cart() {
               </TableRow>
             </TableFooter>
           </Table>
+
           <div className="flex justify-center items-center">
-            {/* <Button
-              className="w-full max-w-sm mx-auto mt-10 "
-              onClick={handleCheckout}
-            >
-              Checkout
-            </Button> */}
-            <ChapaCheckout
-              amount={totalPrice}
-              user={{
-                name: "Naol Meseret",
-                email: "naol@example.com",
-                phone: "0912345678",
-              }}
-            />
+            <form method="POST" action="https://api.chapa.co/v1/hosted/pay">
+              <input
+                type="hidden"
+                name="public_key"
+                value="CHAPUBK_TEST-0tMAyZcHQ2NmFO437ZsuIVATe2EkQJVN"
+              />
+              <input
+                type="hidden"
+                name="tx_ref"
+                value={`negade-tx-${tx_ref}`}
+              />
+              <input type="hidden" name="amount" value={totalPrice} />
+              <input type="hidden" name="currency" value="ETB" />
+              <input type="hidden" name="email" value={user?.email} />
+              <input
+                type="hidden"
+                name="first_name"
+                value={user.name.split(" ")[0]}
+              />
+              <input
+                type="hidden"
+                name="last_name"
+                value={user.name.split(" ")[1]}
+              />
+              <input
+                type="hidden"
+                name="title"
+                value="Pay for Your productss"
+              />
+              <input
+                type="hidden"
+                name="description"
+                value="Paying with Confidence with chapa"
+              />
+              <input
+                type="hidden"
+                name="logo"
+                value="https://chapa.link/asset/images/chapa_swirl.svg"
+              />
+              <input
+                type="hidden"
+                name="callback_url"
+                value="http://localhost:5173/createorder"
+              />
+              <input
+                type="hidden"
+                name="return_url"
+                value="http://localhost:5173/createorder"
+              />
+              <input type="hidden" name="meta[title]" value="test" />
+              <Button className="w-full max-w-sm mx-auto mt-10 " type="submit">
+                Checkout
+              </Button>
+            </form>
           </div>
         </>
       ) : (
