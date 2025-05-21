@@ -19,12 +19,15 @@ import {
   getallcartstobuyer,
 } from "@/services/cart";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Minus, Plus, Trash } from "lucide-react";
+import Checkout from "./ChapaCheckout";
+import ChapaCheckout from "./ChapaCheckout";
 
 export default function Cart() {
   const [searchQuery, setSearchQuery] = useState("");
 
+  const navigate = useNavigate();
   const { data: carts, isLoading } = useQuery({
     queryFn: () => getallcartstobuyer(),
     queryKey: ["carts_item"],
@@ -69,6 +72,10 @@ export default function Cart() {
       });
     },
   });
+
+  const handleCheckout = () => {
+    navigate("/checkout");
+  };
 
   if (isLoading) {
     return (
@@ -124,7 +131,7 @@ export default function Cart() {
                   </TableCell>
                   <TableCell>{cart?.quantity}</TableCell>
                   <TableCell>
-                    <div className="flex justify-between w-full items-center space-x-1">
+                    <div className="flex  w-full items-center space-x-1">
                       <Button
                         disabled={isUpdating}
                         variant="outline"
@@ -169,7 +176,20 @@ export default function Cart() {
             </TableFooter>
           </Table>
           <div className="flex justify-center items-center">
-            <Button className="w-full max-w-sm mx-auto mt-10 ">Checkout</Button>
+            {/* <Button
+              className="w-full max-w-sm mx-auto mt-10 "
+              onClick={handleCheckout}
+            >
+              Checkout
+            </Button> */}
+            <ChapaCheckout
+              amount={totalPrice}
+              user={{
+                name: "Naol Meseret",
+                email: "naol@example.com",
+                phone: "0912345678",
+              }}
+            />
           </div>
         </>
       ) : (

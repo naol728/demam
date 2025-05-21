@@ -148,13 +148,6 @@ export default function SellerProducts() {
       cell: ({ row }) => <div>{row.getValue("stock_quantity")} pcs</div>,
     },
     {
-      accessorKey: "description",
-      header: "Description",
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("description")}</div>
-      ),
-    },
-    {
       accessorKey: "location_name",
       header: "Location",
       cell: ({ row }) => (

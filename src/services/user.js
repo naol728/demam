@@ -58,3 +58,21 @@ export const updateUser = async (updates) => {
     throw new Error(err.message);
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) throw new Error(sessionError.message);
+
+    const user = session?.user;
+    if (!user) throw new Error("Not Autorized");
+
+    return user;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
