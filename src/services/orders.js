@@ -51,7 +51,6 @@ export const getOrders = async () => {
 export const getOrder = async (id) => {
   try {
     if (!id) throw new Error("please provide id to fetch");
-    console.log(id);
     const {
       data: { session },
       error: sessionError,
@@ -93,6 +92,126 @@ export const getOrder = async (id) => {
       console.error("Failed to fetch order:", error.message);
       throw new Error(error.message);
     }
+
+    return data;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+export const createAnOrder = async ({ latitude, longitude, location }) => {
+  try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) throw new Error(sessionError.message);
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("User ID not found");
+
+    const { data: cart, error: cartError } = await supabase
+      .from("carts")
+      .select("id")
+      .eq("user_id", userId)
+      .single();
+
+    if (cartError) throw new Error(cartError.message);
+    if (!cart) throw new Error("Cart not found");
+
+    const { data: cart_items, error } = await supabase
+      .from("cart_items")
+      .select(
+        `*,product:product_id(
+        id,
+        name,
+        price,
+        image_url,
+        seller_id)`
+      )
+      .eq("cart_id", cart.id);
+
+    if (error) throw new Error(error.message);
+
+    const amount = cart_items.reduce(
+      (sum, item) => sum + item.quantity * item.product.price,
+      0
+    );
+
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        user_id: userId,
+        status: "pending",
+        tracking_status: "pending",
+        total_amount: amount,
+        latitude,
+        longitude,
+        location,
+      })
+      .select()
+      .single();
+
+    if (orderError) throw new Error(orderError.message);
+    const orderItems = cart_items.map((item) => ({
+      order_id: order.id,
+      product_info: item.product_id,
+      seller_id: item.product.seller_id,
+      quantity: item.quantity,
+      price: item.product.price,
+    }));
+
+    const { error: insertError } = await supabase
+      .from("order_items")
+      .insert(orderItems);
+
+    if (insertError) {
+      console.log(insertError);
+      throw new Error("Failed to insert order_items");
+    }
+
+    await supabase.from("cart_items").delete().eq("cart_id", cart.id);
+
+    console.log("Order placed successfully!", order.id);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+export const getOrderstoBuyer = async () => {
+  try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) throw new Error(sessionError.message);
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("User ID not found");
+    const { data, error } = await supabase
+      .from("orders")
+      .select(
+        `
+      *,
+      order_items:order_items (
+        id,
+        quantity,
+        price,
+        product:product_info (
+        id,
+        name,
+        image_url,
+        seller_id
+        )
+      )
+      `
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
 
     return data;
   } catch (err) {

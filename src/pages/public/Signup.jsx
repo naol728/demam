@@ -160,7 +160,7 @@ export default function SignUp() {
                           onChange={(e) => setRole(e.target.value)}
                         >
                           <option value="seller">Seller</option>
-                          <option value="merchant">Merchant</option>
+                          <option value="merchant">Buyer</option>
                         </select>
                       </div>
 

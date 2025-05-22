@@ -109,6 +109,7 @@ export default function SellerOrders() {
     },
   });
 
+
   const navigate = useNavigate();
 
   const handleorderdetail = (id) => {
