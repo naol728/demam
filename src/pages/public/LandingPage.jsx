@@ -12,7 +12,7 @@ export default function LandingPage() {
       <div className="max-w-7xl mx-auto">
         <NavBar />
       </div>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto pt-10">
         <Hero />
         <Gallery />
         <Stat />

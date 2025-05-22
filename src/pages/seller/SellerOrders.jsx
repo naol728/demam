@@ -29,9 +29,10 @@ import { getOrders } from "@/services/orders";
 import { formatPrice } from "@/lib/formater";
 import Loading from "@/components/Loading";
 import { useNavigate } from "react-router";
+import { Badge } from "@/components/ui/badge";
 
 export default function SellerOrders() {
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: () => getOrders(),
   });
@@ -43,14 +44,12 @@ export default function SellerOrders() {
 
   const columns = [
     {
-      accessorKey: "location",
+      accessorKey: "order.location",
       header: () => <div className="font-bold">Order Location</div>,
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("location")}</div>
-      ),
+      cell: ({ row }) => row.original.order?.location || "N/A",
     },
     {
-      accessorFn: (row) => row.user?.name,
+      accessorKey: "order.user.name",
       id: "user_name",
       header: ({ column }) => (
         <Button
@@ -60,38 +59,40 @@ export default function SellerOrders() {
           User Name <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => row.original.user?.name || "Unknown",
+      cell: ({ row }) => row.original.order?.user?.name || "Unknown",
     },
-
     {
-      accessorKey: "user.email",
+      accessorKey: "order.user.email",
       header: "User Email",
-      cell: ({ row }) => row.original.user?.email || "N/A",
+      cell: ({ row }) => row.original.order?.user?.email || "N/A",
     },
     {
-      accessorKey: "tracking_status",
+      accessorKey: "order.tracking_status",
       header: "Tracking Status",
-      cell: ({ row }) => row.getValue("tracking_status"),
+      cell: ({ row }) => (
+        <Badge>{row.original.order?.tracking_status || "N/A"}</Badge>
+      ),
     },
     {
-      accessorKey: "status",
+      accessorKey: "order.status",
       header: "Order Status",
-      cell: ({ row }) => row.getValue("status"),
+      cell: ({ row }) => <Badge>{row.original.order?.status || "N/A"}</Badge>,
     },
     {
-      accessorKey: "order_items",
+      accessorKey: "quantity",
       header: "Quantity",
-      cell: ({ row }) => `${row.original.order_items.length} items`,
+      cell: ({ row }) => `${row.original.quantity} pcs`,
     },
     {
-      accessorKey: "total_amount",
-      header: "Amount",
-      cell: ({ row }) => formatPrice(row.getValue("total_amount")),
+      accessorKey: "order.total_amount",
+      header: "Total Amount",
+      cell: ({ row }) =>
+        formatPrice(row.original.order?.total_amount || row.original.price),
     },
   ];
 
   const table = useReactTable({
-    data: orders ?? [],
+    data: orders,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -109,12 +110,13 @@ export default function SellerOrders() {
     },
   });
 
-
   const navigate = useNavigate();
 
-  const handleorderdetail = (id) => {
-    if (!id.row.original.id) return;
-    navigate(`/dashboard/orders/${id.row.original.id}`);
+  const handleOrderDetail = (cell) => {
+    const orderId = cell.row.original.order?.id;
+    if (orderId) {
+      navigate(`/dashboard/orders/${orderId}`);
+    }
   };
 
   if (isLoading) return <Loading />;
@@ -180,7 +182,8 @@ export default function SellerOrders() {
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      onClick={() => handleorderdetail(cell)}
+                      onClick={() => handleOrderDetail(cell)}
+                      className="cursor-pointer"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
