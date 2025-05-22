@@ -1,4 +1,11 @@
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import {
+  Book,
+  GalleryVerticalEnd,
+  Menu,
+  Sunset,
+  Trees,
+  Zap,
+} from "lucide-react";
 
 import {
   Accordion,
@@ -22,90 +29,84 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { signOut } from "@/services/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "@/store/user/userslice";
 
 const NavBar = ({
-  logo = {
-    url: "/",
-    src: "logo.jpg",
-    alt: "logo",
-    title: "Demam Platform",
-  },
+  logo = { url: "/", src: "logo.jpg", alt: "logo", title: "Demam Platform" },
   menu = [
-    { title: "Home", url: "#" },
-    {
-      title: "Featured",
-      url: "#Featured",
-    },
-    {
-      title: "Products",
-      url: "#Products",
-    },
-    {
-      title: "Testemonial",
-      url: "#Products",
-    },
+    { title: "Home", url: "/" },
+    { title: "Featured", url: "/#Featured" },
+    { title: "Products", url: "/#Products" },
+    { title: "Testemonial", url: "/#Testemonial" },
   ],
   auth = {
     login: { title: "Sign in", url: "/signin" },
     signup: { title: "Sign up", url: "/signup" },
   },
 }) => {
+  const location = useLocation(); // get current path
   const { user, role, loading } = useSelector((state) => state.user);
 
   return (
-    <section className="py-4">
-      <div className="container">
+    <section className="">
+      <div className="container shadow-md py-3 px-2 fixed w-full bg-background/90 backdrop-blur-md z-50 border-b border-border-200">
         {/* Desktop Menu */}
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <Link to={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-16 w-14" alt={logo.alt} />
-              <span className="text-lg font-semibold tracking-tighter">
-                {logo.title}
-              </span>
+            <Link to="/" className="flex items-center gap-2 font-medium">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <GalleryVerticalEnd className="size-4" />
+              </div>
+              Demam Platform
             </Link>
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
+                  {menu.map(
+                    (item) => renderMenuItem(item, location.pathname) // pass current path
+                  )}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
           </div>
+
+          {/* Right Buttons */}
           <div className="flex gap-2">
-            {loading ? null : role ? (
-              <>
+            {!loading &&
+              (role ? (
                 <Button asChild size="sm">
-                  {role === "seller" ? ( // ✅ check for "seller"
+                  {role === "seller" ? (
                     <Link to="/dashboard/products">Dashboard</Link>
                   ) : (
                     <Link to="/products">Shop Now</Link>
                   )}
                 </Button>
-              </>
-            ) : (
-              <>
-                <Button asChild variant="outline" size="sm">
-                  <Link to={auth.login.url}>{auth.login.title}</Link>
-                </Button>
-                <Button asChild size="sm">
-                  <Link to={auth.signup.url}>{auth.signup.title}</Link>
-                </Button>
-              </>
-            )}
+              ) : (
+                <>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to={auth.login.url}>{auth.login.title}</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                  </Button>
+                </>
+              ))}
           </div>
         </nav>
 
+        {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
-            <Link to={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8" alt={logo.alt} />
+            <Link to="/" className="flex items-center gap-2 font-medium">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <GalleryVerticalEnd className="size-4" />
+              </div>
+              Demam Platform
             </Link>
             <Sheet>
               <SheetTrigger asChild>
@@ -117,40 +118,44 @@ const NavBar = ({
                 <SheetHeader>
                   <SheetTitle>
                     <Link to={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="max-h-8" alt={logo.alt} />
+                      <GalleryVerticalEnd className="size-4" />
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
+
                 <div className="flex flex-col gap-6 p-4">
                   <Accordion
                     type="single"
                     collapsible
                     className="flex w-full flex-col gap-4"
                   >
-                    {menu.map((item) => renderMobileMenuItem(item))}
+                    {menu.map(
+                      (item) => renderMobileMenuItem(item, location.pathname) // pass current path
+                    )}
                   </Accordion>
 
                   <div className="flex flex-col gap-3">
-                    {loading ? null : role ? (
-                      <>
+                    {!loading &&
+                      (role ? (
                         <Button asChild size="sm">
-                          {role === "seller" ? ( // ✅ check for "seller"
+                          {role === "seller" ? (
                             <Link to="/dashboard/products">Dashboard</Link>
                           ) : (
                             <Link to="/products">Shop Now</Link>
                           )}
                         </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button asChild variant="outline" size="sm">
-                          <Link to={auth.login.url}>{auth.login.title}</Link>
-                        </Button>
-                        <Button asChild size="sm">
-                          <Link to={auth.signup.url}>{auth.signup.title}</Link>
-                        </Button>
-                      </>
-                    )}
+                      ) : (
+                        <>
+                          <Button asChild variant="outline" size="sm">
+                            <Link to={auth.login.url}>{auth.login.title}</Link>
+                          </Button>
+                          <Button asChild size="sm">
+                            <Link to={auth.signup.url}>
+                              {auth.signup.title}
+                            </Link>
+                          </Button>
+                        </>
+                      ))}
                   </div>
                 </div>
               </SheetContent>
@@ -162,7 +167,8 @@ const NavBar = ({
   );
 };
 
-const renderMenuItem = (item) => {
+// Add active class conditionally
+const renderMenuItem = (item, currentPath) => {
   if (item.items) {
     return (
       <NavigationMenuItem key={item.title}>
@@ -178,11 +184,16 @@ const renderMenuItem = (item) => {
     );
   }
 
+  // Check if currentPath matches item.url
+  const isActive = currentPath === item.url;
+
   return (
     <NavigationMenuItem key={item.title}>
       <NavigationMenuLink
         href={item.url}
-        className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-accent-foreground"
+        className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-accent-foreground ${
+          isActive ? "border-b-2 border-primary font-bold text-primary" : ""
+        }`}
       >
         {item.title}
       </NavigationMenuLink>
@@ -190,7 +201,7 @@ const renderMenuItem = (item) => {
   );
 };
 
-const renderMobileMenuItem = (item) => {
+const renderMobileMenuItem = (item, currentPath) => {
   if (item.items) {
     return (
       <AccordionItem key={item.title} value={item.title} className="border-b-0">
@@ -206,29 +217,19 @@ const renderMobileMenuItem = (item) => {
     );
   }
 
+  // Active check for mobile menu links
+  const isActive = currentPath === item.url;
+
   return (
-    <Link key={item.title} to={item.url} className="text-md font-semibold">
+    <Link
+      key={item.title}
+      to={item.url}
+      className={`text-md font-semibold block py-2 ${
+        isActive ? "border-l-4 border-primary pl-3 text-primary font-bold" : ""
+      }`}
+    >
       {item.title}
     </Link>
-  );
-};
-
-const SubMenuLink = ({ item }) => {
-  return (
-    <a
-      className="flex flex-row gap-4 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-muted hover:text-accent-foreground"
-      href={item.url}
-    >
-      <div className="text-foreground">{item.icon}</div>
-      <div>
-        <div className="text-sm font-semibold">{item.title}</div>
-        {item.description && (
-          <p className="text-sm leading-snug text-muted-foreground">
-            {item.description}
-          </p>
-        )}
-      </div>
-    </a>
   );
 };
 

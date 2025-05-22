@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
@@ -8,47 +7,51 @@ const Hero = () => {
   const { user, role, loading } = useSelector((state) => state.user);
 
   return (
-    <section className="py-4">
-      <div className="container">
-        <div className="grid items-center gap-8 bg-muted-2 lg:grid-cols-2">
-          <div className="flex flex-col items-center p-16 text-center lg:items-start lg:text-left">
-            <p>Connecting Merchants and Sellers</p>
-            <h1 className="my-6 text-4xl font-bold text-pretty lg:text-6xl">
+    <section className="py-12 bg-gradient-to-br from-gray-50 to-white">
+      <div className="container mx-auto px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+            <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">
+              Connecting Buyers and Sellers
+            </p>
+            <h1 className="mb-6 max-w-xl text-4xl font-extrabold leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
               Welcome to Demam Platform
             </h1>
-            <p className="mb-8 max-w-xl text-muted-foreground lg:text-xl">
+            <p className="mb-10 max-w-lg text-lg text-gray-600 sm:text-xl">
               Demam is your ultimate shopping platform, bridging the gap between
-              merchants and sellers. Explore a seamless way to connect, trade,
-              and grow your business.
+              Buyers and sellers. Explore a seamless way to connect, trade, and
+              grow your business.
             </p>
-            <div className="flex w-full flex-col justify-center gap-2 sm:flex-row lg:justify-start">
+            <div className="flex w-full max-w-xs flex-col gap-4 sm:max-w-none sm:flex-row sm:justify-start">
               {loading ? null : role ? (
-                <>
-                  <Button asChild size="sm">
-                    {role === "seller" ? ( // ✅ check for "seller"
-                      <Link to="/dashboard/products">Dashboard</Link>
-                    ) : (
-                      <Link to="/products">Shop Now</Link>
-                    )}
-                  </Button>
-                </>
+                <Button asChild size="lg" className="w-full sm:w-auto">
+                  {role === "seller" ? (
+                    <Link to="/dashboard/products">Go to Dashboard</Link>
+                  ) : (
+                    <Link to="/products">Shop Now</Link>
+                  )}
+                </Button>
               ) : (
-                <>
-                  <Link to="/signin">
-                    <Button>
-                      Get Started
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </Link>
-                </>
+                <Link to="/signin" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    Get Started
+                    <ArrowRight className="size-5" />
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
-          <img
-            src="https://cdn.shopify.com/s/files/1/0070/7032/articles/ecommerce_d08806b6-6f5e-4a94-a79f-7eb96b46c547.jpg?v=1743403590"
-            alt="Demam platform hero"
-            className="h-full w-full object-cover"
-          />
+          <div className="relative h-80 w-full overflow-hidden rounded-lg shadow-lg sm:h-[28rem] lg:h-[32rem]">
+            <img
+              src="https://cdn.shopify.com/s/files/1/0070/7032/articles/ecommerce_d08806b6-6f5e-4a94-a79f-7eb96b46c547.jpg?v=1743403590"
+              alt="Demam platform hero"
+              className="h-full w-full object-cover object-center"
+              loading="lazy"
+            />
+          </div>
         </div>
       </div>
     </section>

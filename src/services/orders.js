@@ -13,26 +13,37 @@ export const getOrders = async () => {
     if (!userId) throw new Error("User ID not found");
 
     const { data, error } = await supabase
-      .from("orders")
+      .from("order_items")
       .select(
         `
-    *,
-    user:user_id (
-      id,
-      name,
-      email,
-      phone
-    ),
-    order_items (
-      quantity,
-      price,
-      product:product_info (
         id,
-        name,
-        image_url
-      )
-    )
-  `
+        price,
+        quantity,
+        seller_id,
+        order:order_id (
+          id,
+          user_id,
+          location,
+          latitude,
+          longitude,
+          status,
+          tracking_status,
+          total_amount,
+          created_at,
+          user:user_id(
+          name,
+          email,
+          phone
+          )
+        ),
+        product:product_info (
+          id,
+          name,
+          image_url,
+          price,
+          seller_id
+        )
+        `
       )
       .eq("seller_id", userId);
 
@@ -40,7 +51,6 @@ export const getOrders = async () => {
       console.error("Failed to fetch seller orders:", error.message);
       throw new Error(error.message);
     }
-    console.log(data);
 
     return data;
   } catch (err) {
@@ -80,7 +90,8 @@ export const getOrder = async (id) => {
       product_info (
         id,
         name,
-        price
+        price,
+        image_url
       )
       )
     `
@@ -210,6 +221,49 @@ export const getOrderstoBuyer = async () => {
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return data;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+export const getOrderById = async (id) => {
+  try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) throw new Error(sessionError.message);
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("User ID not found");
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select(
+        `
+        *,
+        order_items (
+          id,
+          quantity,
+          price,
+          product_info (
+            id,
+            name,
+            image_url,
+            price,
+            seller_id
+          )
+        )
+      `
+      )
+      .eq("user_id", userId)
+      .eq("id", id)
+      .single(); // return single order
 
     if (error) throw error;
 
