@@ -20,10 +20,24 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "@/services/auth";
 import { clearUser } from "@/store/user/userslice";
+import { useQuery } from "@tanstack/react-query";
+import { getallcartstobuyer } from "@/services/cart";
+import { Badge } from "@/components/ui/badge";
+import { getOrderstoBuyer } from "@/services/orders";
 
 export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
+
+  const { data: carts } = useQuery({
+    queryFn: () => getallcartstobuyer(),
+    queryKey: ["carts_item"],
+  });
+  const { data: orders } = useQuery({
+    queryKey: ["orders"],
+    queryFn: () => getOrderstoBuyer(),
+  });
+
   const naviagate = useNavigate();
   const dispatch = useDispatch();
 
@@ -41,20 +55,36 @@ export default function NavBar() {
           <img src="logo.jpg" className="max-h-16 w-14" alt="Logo" />
           <div className="text-xl font-semibold tracking-tight ">Demam</div>
         </Link>
-
         {/* Desktop Links */}
         <div className="hidden md:flex space-x-8 text-base font-base">
           <Link to="/products" className="flex justify-center gap-2">
             <ShoppingBag size={20} /> Products
           </Link>
-          <Link to="/carts" className="flex justify-center gap-2">
-            <ShoppingCart size={20} /> Cart
+          <Link to="/carts" className="flex justify-center gap-2 relative">
+            <div className="relative">
+              <ShoppingCart size={20} />
+              <Badge
+                className="absolute -top-2 -right-2 px-1.5 py-0 text-xs rounded-full"
+                variant="secondary"
+              >
+                {carts?.length ?? 0}
+              </Badge>
+            </div>
+            Cart
           </Link>
           <Link to="/orders" className="flex justify-center gap-2">
-            <ArrowUpFromLine size={20} /> Orders
+            <div className="relative">
+              <ArrowUpFromLine size={20} />
+              <Badge
+                className="absolute -top-2 -right-2 px-1.5 py-0 text-xs rounded-full"
+                variant="secondary"
+              >
+                {orders?.length ?? 0}
+              </Badge>
+            </div>
+            Orders
           </Link>
         </div>
-
         {/* Avatar */}
         <div className="flex items-center space-x-4">
           <DropdownMenu>
@@ -107,9 +137,27 @@ export default function NavBar() {
             Products
           </Link>
           <Link to="/carts" className="block text-base py-2 ">
+            <div className="relative">
+              <ShoppingCart size={20} />
+              <Badge
+                className="absolute -top-2 -right-2 px-1.5 py-0 text-xs rounded-full"
+                variant="secondary"
+              >
+                {carts?.length ?? 0}
+              </Badge>
+            </div>
             Cart
           </Link>
           <Link to="/orders" className="block text-base py-2 ">
+            <div className="relative">
+              <ArrowUpFromLine size={20} />
+              <Badge
+                className="absolute -top-2 -right-2 px-1.5 py-0 text-xs rounded-full"
+                variant="secondary"
+              >
+                {orders?.length ?? 0}
+              </Badge>
+            </div>
             Orders
           </Link>
         </div>
