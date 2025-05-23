@@ -109,13 +109,7 @@ export default function SellerOrderDetail() {
         <CardHeader>
           <CardTitle>Delivery Location</CardTitle>
         </CardHeader>
-        <CardContent className="h-full p-0 rounded overflow-hidden">
-          <MapView
-            latitude={latitude}
-            longitude={longitude}
-            location={location}
-          />
-        </CardContent>
+        <CardContent className="h-full p-0 rounded overflow-hidden"></CardContent>
       </Card>
     </div>
   );
