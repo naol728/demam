@@ -215,7 +215,7 @@ export const getOrderstoBuyer = async () => {
         id,
         name,
         image_url,
-        seller_id,
+        seller_id
 
         )
       )
