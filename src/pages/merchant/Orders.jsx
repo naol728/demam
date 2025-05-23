@@ -28,6 +28,8 @@ export default function Orders() {
     navigate(`/orders/${id}`);
   };
 
+  console.log(orders);
+
   if (isLoading) {
     return (
       <div className="flex flex-col h-full max-w-5xl w-full space-y-4 mx-auto mt-6">
@@ -42,7 +44,7 @@ export default function Orders() {
   return (
     <div className="max-w-5xl w-full mx-auto mt-8 p-4">
       <h2 className="text-2xl font-semibold mb-6">Your Orders</h2>
-      {orders.length > 0 ? (
+      {orders?.length > 0 ? (
         <Table className="rounded-md border overflow-hidden shadow-sm">
           <TableCaption className="py-2 text-muted-foreground">
             A list of your recent orders.
