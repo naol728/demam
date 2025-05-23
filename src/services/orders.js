@@ -210,11 +210,13 @@ export const getOrderstoBuyer = async () => {
         id,
         quantity,
         price,
+        
         product:product_info (
         id,
         name,
         image_url,
-        seller_id
+        seller_id,
+
         )
       )
       `
@@ -256,7 +258,13 @@ export const getOrderById = async (id) => {
             name,
             image_url,
             price,
-            seller_id
+            longitude,
+            latitude,
+            location_name,
+            seller:seller_id(
+            name,
+            email,
+            phone)
           )
         )
       `

@@ -49,7 +49,6 @@ export default function NavBar() {
     navigate("/");
   };
 
-  // Utility for active class
   const isActive = (path) =>
     location.pathname === path
       ? "text-primary font-bold border-b-2 border-primary"
@@ -95,7 +94,7 @@ export default function NavBar() {
 
           <Link
             to="/orders"
-            className={`flex items-center gap-2 ${isActive("/orders")}`}
+            className={`flex items-center gap-2 relative ${isActive("/orders")}`}
           >
             <ArrowUpFromLine size={20} />
             <Badge
