@@ -7,17 +7,17 @@ const Hero = () => {
   const { user, role, loading } = useSelector((state) => state.user);
 
   return (
-    <section className="py-12 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-12 bg-gradient-to-br from-background/50 to-background">
       <div className="container mx-auto px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
             <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">
               Connecting Buyers and Sellers
             </p>
-            <h1 className="mb-6 max-w-xl text-4xl font-extrabold leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
+            <h1 className="mb-6 max-w-xl text-4xl font-extrabold leading-tight text-forground sm:text-5xl lg:text-6xl">
               Welcome to Demam Platform
             </h1>
-            <p className="mb-10 max-w-lg text-lg text-gray-600 sm:text-xl">
+            <p className="mb-10 max-w-lg text-lg text-muted-foreground sm:text-xl">
               Demam is your ultimate shopping platform, bridging the gap between
               Buyers and sellers. Explore a seamless way to connect, trade, and
               grow your business.

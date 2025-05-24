@@ -84,14 +84,14 @@ const Gallery = ({
   }, [carouselApi]);
 
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-24 bg-gradient-to-b from-background/50 to-background">
       <div className="container mx-auto px-6">
         <div className="mb-12 flex flex-col-reverse items-center justify-between gap-6 md:flex-row md:mb-16">
           <div className="max-w-xl text-center md:text-left">
-            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-forground sm:text-5xl">
               {title}
             </h2>
-            <p className="text-lg text-gray-600">{description}</p>
+            <p className="text-lg text-muted-foreground">{description}</p>
           </div>
           <div className="flex gap-3">
             <Button

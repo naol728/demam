@@ -13,6 +13,7 @@ import {
   User,
   BarChart3,
   ChevronDown,
+  GalleryVerticalEnd,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
@@ -57,16 +58,15 @@ export function AppSidebar() {
   return (
     <Sidebar className="h-screen border-r bg-background">
       <SidebarHeader />
-      <Link to="/">
-        <div className="text-xl font-bold text-center py-2 tracking-wide">
-          <div className="flex justify-center items-center h-full">
-            <div>
-              <img src="/logo.jpg" className="size-5" alt="Logo" />
-              Demam Shop
-            </div>
+
+      <div className="text-xl font-bold text-center ">
+        <Link to="/" className="flex items-center gap-2 font-medium">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="size-4" />
           </div>
-        </div>
-      </Link>
+          <span>Demam Platform</span>
+        </Link>
+      </div>
 
       <SidebarContent>
         <nav className="flex flex-col gap-1 p-4">
