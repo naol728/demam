@@ -1,0 +1,195 @@
+import * as React from "react";
+import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import supabase from "@/services/supabase";
+import { Badge } from "@/components/ui/badge";
+
+const MAPBOX_TOKEN =
+  "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
+
+export default function SellerMapView({
+  order,
+  product,
+  prodyuctlat,
+  productlng,
+}) {
+  const mapRef = React.useRef();
+  const [orderlat, setOrderLat] = React.useState(order.latitude);
+  const [orderlng, setOrderLng] = React.useState(order.longitude);
+  const [productLat, setProductLat] = React.useState(prodyuctlat);
+  const [productLng, setProductLng] = React.useState(productlng);
+  const [route, setRoute] = React.useState(null);
+  const [distance, setDistance] = React.useState(null);
+  const [isMapLoaded, setIsMapLoaded] = React.useState(false);
+
+  const [viewState, setViewState] = React.useState({
+    latitude: order.latitude,
+    longitude: order.longitude,
+    zoom: 12,
+  });
+
+  // Fit map to bounds
+  React.useEffect(() => {
+    if (orderlat && orderlng && productLat && productLng && mapRef.current) {
+      const bounds = [
+        [Math.min(orderlng, productLng), Math.min(productLat, orderlat)],
+        [Math.max(orderlng, productLng), Math.max(productLat, orderlat)],
+      ];
+      mapRef.current.fitBounds(bounds, {
+        padding: 100,
+        duration: 1000,
+      });
+    }
+  }, [orderlat, orderlng, productLat, productLng]);
+
+  // Track product movement
+  React.useEffect(() => {
+    let watchId;
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setProductLat(coords.latitude);
+        setProductLng(coords.longitude);
+        updateProductLocation(coords.latitude, coords.longitude);
+
+        // Start tracking after permission granted
+        watchId = navigator.geolocation.watchPosition(
+          ({ coords }) => {
+            setProductLat(coords.latitude);
+            setProductLng(coords.longitude);
+            updateProductLocation(coords.latitude, coords.longitude);
+          },
+          (error) => console.error("Geolocation error during tracking:", error),
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+        );
+      },
+      (error) => {
+        console.error("Geolocation permission denied or error:", error);
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
+  async function updateProductLocation(latitude, longitude) {
+    await supabase
+      .from("products")
+      .update({ latitude, longitude })
+      .eq("id", product);
+  }
+
+  // Realtime order updates
+  React.useEffect(() => {
+    const fetchInitialLocation = async () => {
+      const { data } = await supabase
+        .from("orders")
+        .select("latitude, longitude")
+        .eq("id", order.id)
+        .single();
+      if (data) {
+        setOrderLat(data.latitude);
+        setOrderLng(data.longitude);
+      }
+    };
+
+    fetchInitialLocation();
+
+    const channel = supabase
+      .channel("realtime:orders")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+          filter: `id=eq.${order.id}`,
+        },
+        (payload) => {
+          setOrderLat(payload.new.latitude);
+          setOrderLng(payload.new.longitude);
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [product]);
+
+  // Fetch route from Mapbox
+  React.useEffect(() => {
+    if (!productLat || !productLng || !orderlat || !orderlng) return;
+
+    const fetchRoute = async () => {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${productLng},${productLat};${orderlng},${orderlat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.routes?.length > 0) {
+        setRoute(data.routes[0].geometry);
+        setDistance((data.routes[0].distance / 1000).toFixed(2));
+      }
+    };
+
+    fetchRoute();
+  }, [productLat, productLng, orderlat, orderlng]);
+
+  return (
+    <div className="h-full w-full relative rounded-xl overflow-hidden">
+      <Map
+        ref={mapRef}
+        mapboxAccessToken={MAPBOX_TOKEN}
+        mapStyle="mapbox://styles/naol528/cmaumgyjx001u01sdagd6c5e3"
+        style={{ width: "100%", height: "100%" }}
+        {...viewState}
+        onMove={(evt) => setViewState(evt.viewState)}
+        onLoad={() => setIsMapLoaded(true)}
+      >
+        <Marker latitude={orderlat} longitude={orderlng} color="red" />
+        <Popup latitude={orderlat} longitude={orderlng} closeButton={false}>
+          <p className="text-sm font-semibold">Order Location</p>
+        </Popup>
+
+        {productLat && productLng && (
+          <>
+            <Marker
+              latitude={productLat}
+              longitude={productLng}
+              color="green"
+            />
+            <Popup
+              latitude={productLat}
+              longitude={productLng}
+              closeButton={false}
+            >
+              <p className="text-sm font-semibold">Your Location</p>
+            </Popup>
+          </>
+        )}
+
+        {isMapLoaded && route && (
+          <Source
+            id="route"
+            type="geojson"
+            data={{ type: "Feature", geometry: route }}
+          >
+            <Layer
+              id="route-line"
+              type="line"
+              paint={{
+                "line-color": "#00b894",
+                "line-width": 4,
+              }}
+            />
+          </Source>
+        )}
+      </Map>
+
+      {distance && (
+        <div className="absolute top-2 left-2">
+          <Badge variant="secondary">Distance: {distance} km</Badge>
+        </div>
+      )}
+    </div>
+  );
+}

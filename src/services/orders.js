@@ -91,7 +91,10 @@ export const getOrder = async (id) => {
         id,
         name,
         price,
-        image_url
+        image_url,
+        seller_id,
+        latitude,
+        longitude
       )
       )
     `
@@ -103,8 +106,14 @@ export const getOrder = async (id) => {
       console.error("Failed to fetch order:", error.message);
       throw new Error(error.message);
     }
-
-    return data;
+    const filterd = data.order_items.filter(
+      (el) => el.product_info.seller_id === userId
+    );
+    const amount = filterd.reduce(
+      (sum, item) => sum + item.product_info.price * item.quantity,
+      0
+    );
+    return { ...data, order_items: filterd || [], total_amount: amount };
   } catch (err) {
     throw new Error(err.message);
   }

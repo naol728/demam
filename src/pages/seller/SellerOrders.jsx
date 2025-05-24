@@ -41,7 +41,6 @@ export default function SellerOrders() {
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
-
   const columns = [
     {
       accessorKey: "order.location",

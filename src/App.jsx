@@ -44,8 +44,8 @@ function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/carts" element={<Cart />} />
+            <Route path="/profile" element={<SellerProfile />} />
           </Route>
-          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Seller protected routes */}
