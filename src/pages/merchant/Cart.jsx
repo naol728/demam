@@ -31,7 +31,6 @@ export default function Cart() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const naviage = useNavigate();
-
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

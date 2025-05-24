@@ -14,6 +14,7 @@ export default function SellerMapView({
   productlng,
 }) {
   const mapRef = React.useRef();
+  console.log(order.id);
   const [orderlat, setOrderLat] = React.useState(order.latitude);
   const [orderlng, setOrderLng] = React.useState(order.longitude);
   const [productLat, setProductLat] = React.useState(prodyuctlat);
@@ -145,24 +146,20 @@ export default function SellerMapView({
         onMove={(evt) => setViewState(evt.viewState)}
         onLoad={() => setIsMapLoaded(true)}
       >
-        <Marker latitude={orderlat} longitude={orderlng} color="red" />
+        <Marker latitude={orderlat} longitude={orderlng} color="green" />
         <Popup latitude={orderlat} longitude={orderlng} closeButton={false}>
-          <p className="text-sm font-semibold">Order Location</p>
+          <p className="text-sm font-semibold">Order</p>
         </Popup>
 
         {productLat && productLng && (
           <>
-            <Marker
-              latitude={productLat}
-              longitude={productLng}
-              color="green"
-            />
+            <Marker latitude={productLat} longitude={productLng} color="red" />
             <Popup
               latitude={productLat}
               longitude={productLng}
               closeButton={false}
             >
-              <p className="text-sm font-semibold">Your Location</p>
+              <p className="text-sm font-semibold">Me</p>
             </Popup>
           </>
         )}

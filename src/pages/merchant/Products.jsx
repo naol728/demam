@@ -151,10 +151,10 @@ export default function Products() {
       </div>
 
       {/* Products Grid */}
-      {filteredProducts.length > 0 ? (
+      {filteredProducts?.length > 0 ? (
         <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {filteredProducts.map((product, index) => {
-            if (index === filteredProducts.length - 1) {
+            if (index === filteredProducts?.length - 1) {
               return (
                 <div key={product.id} ref={lastProductRef}>
                   <ProductCard

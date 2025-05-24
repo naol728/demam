@@ -14,6 +14,7 @@ export default function MapView({ order, product }) {
   const [prodLng, setProdLng] = React.useState(null);
   const [route, setRoute] = React.useState(null);
   const [distance, setDistance] = React.useState(null);
+  const [isMapLoaded, setIsMapLoaded] = React.useState(false);
 
   const [viewState, setViewState] = React.useState({
     latitude: order.latitude,
@@ -37,17 +38,34 @@ export default function MapView({ order, product }) {
 
   // Simulate buyer movement
   React.useEffect(() => {
-    let latitude = order.latitude;
-    let longitude = order.longitude;
+    let watchId;
 
-    const interval = setInterval(() => {
-      setLat(latitude);
-      setLng(longitude);
-      setViewState((prev) => ({ ...prev, latitude, longitude }));
-      updateBuyerLocation(latitude, longitude);
-    }, 2000);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setLat(coords.latitude);
+        setLng(coords.longitude);
+        updateBuyerLocation(coords.latitude, coords.longitude);
 
-    return () => clearInterval(interval);
+        // Start tracking after permission granted
+        watchId = navigator.geolocation.watchPosition(
+          ({ coords }) => {
+            setLat(coords.latitude);
+            setLat(coords.longitude);
+            updateBuyerLocation(coords.latitude, coords.longitude);
+          },
+          (error) => console.error("Geolocation error during tracking:", error),
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+        );
+      },
+      (error) => {
+        console.error("Geolocation permission denied or error:", error);
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   async function updateBuyerLocation(latitude, longitude) {
@@ -113,7 +131,7 @@ export default function MapView({ order, product }) {
 
     fetchRoute();
   }, [prodLat, prodLng, lat, lng]);
-
+  console.log(lat, lng);
   return (
     <div className="h-full w-full rounded overflow-hidden relative">
       <Map
@@ -123,11 +141,12 @@ export default function MapView({ order, product }) {
         style={{ width: "100%", height: "100%" }}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
+        onLoad={() => setIsMapLoaded(true)}
       >
         {/* Buyer Marker */}
         <Marker latitude={lat} longitude={lng} color="red" />
         <Popup latitude={lat} longitude={lng} closeButton={false}>
-          Your Location
+          Me
         </Popup>
 
         {/* Product Marker */}
@@ -135,13 +154,13 @@ export default function MapView({ order, product }) {
           <>
             <Marker latitude={prodLat} longitude={prodLng} color="green" />
             <Popup latitude={prodLat} longitude={prodLng} closeButton={false}>
-              Product Location
+              Product
             </Popup>
           </>
         )}
 
         {/* Route Line */}
-        {route && (
+        {isMapLoaded && route && (
           <Source
             id="route"
             type="geojson"
@@ -151,7 +170,7 @@ export default function MapView({ order, product }) {
               id="route-line"
               type="line"
               paint={{
-                "line-color": "#3b8",
+                "line-color": "#00b894",
                 "line-width": 4,
               }}
             />
