@@ -6,7 +6,6 @@ import Protectedroute from "./layout/Protectedroute";
 import Products from "./pages/merchant/Products";
 import Orders from "./pages/merchant/Orders";
 import Cart from "./pages/merchant/Cart";
-import Profile from "./pages/merchant/Profile";
 import MainLayout from "./layout/MainLayout";
 import { useDispatch } from "react-redux";
 import { fetchUser } from "./store/user/userslice";
