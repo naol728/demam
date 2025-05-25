@@ -94,6 +94,10 @@ export default function OrderDetail() {
                   {formatPrice(item.price)}
                 </p>
                 <p>
+                  <span className="font-medium">Status:</span>{" "}
+                  <Badge>{item.status}</Badge>
+                </p>
+                <p>
                   <span className="font-medium">Quantity:</span> {item.quantity}
                 </p>
 
