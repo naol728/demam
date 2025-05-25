@@ -136,7 +136,7 @@ export default function SellerMapView({
   }, [productLat, productLng, orderlat, orderlng]);
 
   return (
-    <div className="h-full w-full relative rounded-xl overflow-hidden">
+    <div className="h-full min-h-screen w-full relative rounded-xl overflow-hidden">
       <Map
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
