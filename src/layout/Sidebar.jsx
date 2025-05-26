@@ -2,9 +2,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -39,49 +37,46 @@ const navItems = [
 export function AppSidebar() {
   const { user, role, loading } = useSelector((state) => state.user);
   const location = useLocation();
-  const naviagate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handlesignout = async () => {
+  const handleSignOut = async () => {
     await signOut();
     dispatch(clearUser());
-    naviagate("/");
+    navigate("/");
   };
 
   if (loading)
     return (
-      <div className="h-dvh">
+      <div className="h-screen flex items-center justify-center">
         <Loading />
       </div>
     );
 
   return (
-    <Sidebar className="h-screen border-r bg-background">
-      <SidebarHeader />
-
-      <div className="text-xl font-bold text-center ">
-        <Link to="/" className="flex items-center gap-2 font-medium">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <GalleryVerticalEnd className="size-4" />
+    <Sidebar className="h-screen border-r bg-background shadow-md">
+      <SidebarHeader className="p-4 border-b">
+        <Link to="/" className="flex items-center gap-2 font-semibold text-lg">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow">
+            <GalleryVerticalEnd className="w-4 h-4" />
           </div>
           <span>Demam Platform</span>
         </Link>
-      </div>
+      </SidebarHeader>
 
-      <SidebarContent>
-        <nav className="flex flex-col gap-1 p-4">
+      <SidebarContent className="py-4">
+        <nav className="flex flex-col gap-1 px-4">
           {navItems.map(({ title, url, icon: Icon }) => {
             const isActive = location.pathname.startsWith(url);
-
             return (
               <Link
                 key={title}
                 to={url}
                 className={clsx(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   {
-                    "bg-primary/80 text-foreground font-semibold": isActive,
-                    "hover:bg-muted/70 text-muted-foreground": !isActive,
+                    "bg-primary text-white shadow-sm": isActive,
+                    "text-muted-foreground hover:bg-muted/70": !isActive,
                   }
                 )}
               >
@@ -93,29 +88,29 @@ export function AppSidebar() {
         </nav>
       </SidebarContent>
 
-      <SidebarFooter className="px-4 py-3 border-t">
+      <SidebarFooter className="border-t p-4">
         <Collapsible>
-          <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 p-2 rounded-md transition hover:bg-muted">
+          <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 rounded-md p-2 hover:bg-muted transition">
             <div className="flex items-center gap-3">
-              <Avatar className="w-9 h-9">
+              <Avatar className="h-9 w-9">
                 <AvatarImage src={user.profileimg} />
                 <AvatarFallback>{user.name?.[0] ?? "U"}</AvatarFallback>
               </Avatar>
-              <div className="flex flex-col text-left">
+              <div className="flex flex-col">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-xs text-muted-foreground">
                   {user.email}
                 </span>
               </div>
             </div>
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </CollapsibleTrigger>
 
           <CollapsibleContent className="mt-2">
             <Button
               variant="ghost"
-              className="w-full justify-start text-red-500 hover:bg-destructive/10 hover:text-red-600"
-              onClick={handlesignout}
+              className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={handleSignOut}
             >
               Logout
             </Button>

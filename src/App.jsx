@@ -23,6 +23,7 @@ import OrderDetail from "./pages/merchant/OrderDetail";
 
 function App() {
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);

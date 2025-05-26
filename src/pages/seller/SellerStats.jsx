@@ -4,202 +4,150 @@ import {
   BarChart,
   CartesianGrid,
   XAxis,
+  YAxis,
+  Tooltip,
   PieChart,
   Pie,
-  Label,
+  Cell,
+  ResponsiveContainer,
 } from "recharts";
 import * as React from "react";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
-
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "hsl(var(--chart-2))",
-  },
-};
-
-const chartData2 = [
-  { browser: "Chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "Safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "Firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "Edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "Other", visitors: 190, fill: "var(--color-other)" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getStats } from "@/services/stat";
+import Loading from "@/components/Loading";
+import { formatPrice } from "@/lib/formater";
 
 export default function SellerStats() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData2.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
+  const { data: stat, isLoading } = useQuery({
+    queryFn: getStats,
+    queryKey: ["stats"],
+  });
+
+  if (isLoading || !stat) return <Loading />;
+
+  const {
+    allproducts,
+    orderscount,
+    avarageprice,
+    totalorderprice,
+    categoryCounts,
+    orderStatusCount,
+  } = stat;
 
   return (
-    <div className="w-full h-full p-4">
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="max-w-7xl rounded-lg border shadow-sm bg-background"
-      >
-        {/* Bar Chart Panel */}
-        <ResizablePanel defaultSize={50}>
-          <div className="h-full p-4">
-            <Card className="h-full flex flex-col">
-              <CardHeader>
-                <CardTitle className="text-xl">Visitors by Platform</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <ChartContainer config={chartConfig}>
-                  <BarChart data={chartData} height={240}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="month"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      tickFormatter={(value) => value.slice(0, 3)}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dashed" />}
-                    />
-                    <Bar
-                      dataKey="desktop"
-                      fill="var(--color-desktop)"
-                      radius={4}
-                    />
-                    <Bar
-                      dataKey="mobile"
-                      fill="var(--color-mobile)"
-                      radius={4}
-                    />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-              <CardFooter className="flex-col items-start gap-1 text-sm">
-                <div className="flex gap-2 font-semibold text-green-600">
-                  Trending up by 5.2% this month{" "}
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <p className="text-muted-foreground">
-                  Showing platform visitor stats for the last 6 months
-                </p>
-              </CardFooter>
-            </Card>
-          </div>
-        </ResizablePanel>
+    <div className="w-full p-4 md:p-8 space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            title: "Total Products",
+            value: `${allproducts} Products`,
+            description: "Published by seller",
+          },
+          {
+            title: "Total Orders",
+            value: `${orderscount} Orders`,
+            description: "Placed by customers",
+          },
+          {
+            title: "Average Price",
+            value: formatPrice(avarageprice),
+            description: "Across all products",
+          },
+          {
+            title: "Total Revenue",
+            value: formatPrice(totalorderprice),
+            description: "From all orders",
+          },
+        ].map((stat, i) => (
+          <Card key={i} className="bg-muted/40 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base text-primary font-semibold">
+                {stat.title}
+              </CardTitle>
+              <CardDescription>{stat.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="text-2xl font-bold text-foreground">
+              {stat.value}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-        <ResizableHandle />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-primary">Products by Category</CardTitle>
+            <CardDescription>Breakdown of your products</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={Object.entries(categoryCounts).map(([name, value]) => ({
+                    name,
+                    value,
+                  }))}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {Object.keys(categoryCounts).map((_, i) => (
+                    <Cell key={i} fill={`hsl(${(i + 1) * 60}, 70%, 60%)`} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        {/* Pie Chart Panel */}
-        <ResizablePanel defaultSize={50}>
-          <ResizablePanelGroup direction="vertical">
-            <ResizablePanel defaultSize={100}>
-              <div className="h-full p-4">
-                <Card className="h-full flex flex-col">
-                  <CardHeader className="items-center">
-                    <CardTitle className="text-xl">
-                      Visitors by Browser
-                    </CardTitle>
-                    <CardDescription>January - June 2024</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <ChartContainer
-                      config={chartConfig}
-                      className="mx-auto aspect-square max-h-[300px]"
-                    >
-                      <PieChart>
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Pie
-                          data={chartData2}
-                          dataKey="visitors"
-                          nameKey="browser"
-                          innerRadius={60}
-                          outerRadius={90}
-                          strokeWidth={2}
-                        >
-                          <Label
-                            content={({ viewBox }) => {
-                              if (
-                                viewBox &&
-                                "cx" in viewBox &&
-                                "cy" in viewBox
-                              ) {
-                                return (
-                                  <text
-                                    x={viewBox.cx}
-                                    y={viewBox.cy}
-                                    textAnchor="middle"
-                                    dominantBaseline="middle"
-                                  >
-                                    <tspan
-                                      x={viewBox.cx}
-                                      y={viewBox.cy}
-                                      className="fill-foreground text-3xl font-bold"
-                                    >
-                                      {totalVisitors.toLocaleString()}
-                                    </tspan>
-                                    <tspan
-                                      x={viewBox.cx}
-                                      y={(viewBox.cy || 0) + 24}
-                                      className="fill-muted-foreground text-sm"
-                                    >
-                                      Visitors
-                                    </tspan>
-                                  </text>
-                                );
-                              }
-                            }}
-                          />
-                        </Pie>
-                      </PieChart>
-                    </ChartContainer>
-                  </CardContent>
-                  <CardFooter className="flex-col items-start gap-1 text-sm">
-                    <div className="flex items-center gap-2 font-semibold text-green-600">
-                      Trending up by 5.2% this month{" "}
-                      <TrendingUp className="h-4 w-4" />
-                    </div>
-                    <p className="text-muted-foreground">
-                      Showing browser visitor stats for the last 6 months
-                    </p>
-                  </CardFooter>
-                </Card>
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-primary">Orders by Status</CardTitle>
+            <CardDescription>Distribution of order statuses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={Object.entries(orderStatusCount).map(
+                    ([name, value]) => ({
+                      name,
+                      value,
+                    })
+                  )}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {Object.keys(orderStatusCount).map((_, i) => (
+                    <Cell key={i} fill={`hsl(${(i + 1) * 60}, 70%, 60%)`} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

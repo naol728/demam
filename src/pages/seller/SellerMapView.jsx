@@ -4,8 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import supabase from "@/services/supabase";
 import { Badge } from "@/components/ui/badge";
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
+const MAPBOX_TOKEN = "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
 
 export default function SellerMapView({
   order,
@@ -14,7 +13,6 @@ export default function SellerMapView({
   productlng,
 }) {
   const mapRef = React.useRef();
-  console.log(order.id);
   const [orderlat, setOrderLat] = React.useState(order.latitude);
   const [orderlng, setOrderLng] = React.useState(order.longitude);
   const [productLat, setProductLat] = React.useState(prodyuctlat);
@@ -53,7 +51,6 @@ export default function SellerMapView({
         setProductLng(coords.longitude);
         updateProductLocation(coords.latitude, coords.longitude);
 
-        // Start tracking after permission granted
         watchId = navigator.geolocation.watchPosition(
           ({ coords }) => {
             setProductLat(coords.latitude);
@@ -76,10 +73,7 @@ export default function SellerMapView({
   }, []);
 
   async function updateProductLocation(latitude, longitude) {
-    await supabase
-      .from("products")
-      .update({ latitude, longitude })
-      .eq("id", product);
+    await supabase.from("products").update({ latitude, longitude }).eq("id", product);
   }
 
   // Realtime order updates
@@ -136,7 +130,7 @@ export default function SellerMapView({
   }, [productLat, productLng, orderlat, orderlng]);
 
   return (
-    <div className="h-full min-h-screen w-full relative rounded-xl overflow-hidden">
+    <div className="relative h-full min-h-screen w-full bg-white dark:bg-gray-950 shadow-xl rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
       <Map
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
@@ -148,34 +142,27 @@ export default function SellerMapView({
       >
         <Marker latitude={orderlat} longitude={orderlng} color="green" />
         <Popup latitude={orderlat} longitude={orderlng} closeButton={false}>
-          <p className="text-sm font-semibold">Order</p>
+          <p className="text-sm font-semibold text-green-700">Order</p>
         </Popup>
 
         {productLat && productLng && (
           <>
             <Marker latitude={productLat} longitude={productLng} color="red" />
-            <Popup
-              latitude={productLat}
-              longitude={productLng}
-              closeButton={false}
-            >
-              <p className="text-sm font-semibold">Me</p>
+            <Popup latitude={productLat} longitude={productLng} closeButton={false}>
+              <p className="text-sm font-semibold text-red-700">You</p>
             </Popup>
           </>
         )}
 
         {isMapLoaded && route && (
-          <Source
-            id="route"
-            type="geojson"
-            data={{ type: "Feature", geometry: route }}
-          >
+          <Source id="route" type="geojson" data={{ type: "Feature", geometry: route }}>
             <Layer
               id="route-line"
               type="line"
               paint={{
                 "line-color": "#00b894",
-                "line-width": 4,
+                "line-width": 5,
+                "line-opacity": 0.8,
               }}
             />
           </Source>
@@ -183,8 +170,13 @@ export default function SellerMapView({
       </Map>
 
       {distance && (
-        <div className="absolute top-2 left-2">
-          <Badge variant="secondary">Distance: {distance} km</Badge>
+        <div
+        
+          className="absolute top-4 left-4 bg-white dark:bg-gray-800 shadow-lg rounded-full px-4 py-2"
+        >
+          <Badge variant="secondary" className="text-base font-medium">
+            Distance: {distance} km
+          </Badge>
         </div>
       )}
     </div>

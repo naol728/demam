@@ -32,19 +32,21 @@ import { useNavigate } from "react-router";
 import { Badge } from "@/components/ui/badge";
 
 export default function SellerOrders() {
+  const navigate = useNavigate();
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders"],
-    queryFn: () => getOrders(),
+    queryFn: getOrders,
   });
 
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
+
   const columns = [
     {
       accessorKey: "order.location",
-      header: () => <div className="font-bold">Order Location</div>,
+      header: () => <div className="font-semibold text-sm">Order Location</div>,
       cell: ({ row }) => row.original.order?.location || "N/A",
     },
     {
@@ -53,6 +55,7 @@ export default function SellerOrders() {
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="text-sm"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           User Name <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -62,29 +65,33 @@ export default function SellerOrders() {
     },
     {
       accessorKey: "order.user.email",
-      header: "User Email",
+      header: () => <div className="text-sm font-medium">User Email</div>,
       cell: ({ row }) => row.original.order?.user?.email || "N/A",
     },
     {
       accessorKey: "order.tracking_status",
-      header: "Tracking Status",
+      header: () => <div className="text-sm font-medium">Tracking</div>,
       cell: ({ row }) => (
-        <Badge>{row.original.order?.tracking_status || "N/A"}</Badge>
+        <Badge variant="outline">
+          {row.original.order?.tracking_status || "N/A"}
+        </Badge>
       ),
     },
     {
       accessorKey: "order.status",
-      header: "Order Status",
-      cell: ({ row }) => <Badge>{row.original.order?.status || "N/A"}</Badge>,
+      header: () => <div className="text-sm font-medium">Order Status</div>,
+      cell: ({ row }) => (
+        <Badge variant="secondary">{row.original.order?.status || "N/A"}</Badge>
+      ),
     },
     {
       accessorKey: "quantity",
-      header: "Quantity",
+      header: () => <div className="text-sm font-medium">Quantity</div>,
       cell: ({ row }) => `${row.original.quantity} pcs`,
     },
     {
       accessorKey: "order.total_amount",
-      header: "Total Amount",
+      header: () => <div className="text-sm font-medium">Total Amount</div>,
       cell: ({ row }) =>
         formatPrice(row.original.order?.total_amount || row.original.price),
     },
@@ -109,32 +116,28 @@ export default function SellerOrders() {
     },
   });
 
-  const navigate = useNavigate();
-
   const handleOrderDetail = (cell) => {
     const orderId = cell.row.original.order?.id;
-    if (orderId) {
-      navigate(`/dashboard/orders/${orderId}`);
-    }
+    if (orderId) navigate(`/dashboard/orders/${orderId}`);
   };
 
   if (isLoading) return <Loading />;
 
   return (
-    <div className="max-w-5xl mx-auto mt-10">
-      <div className="flex items-center py-4">
+    <div className="max-w-6xl mx-auto py-10 px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <Input
-          placeholder="Filter by user name..."
+          placeholder="Search by user name..."
           value={table.getColumn("user_name")?.getFilterValue() ?? ""}
           onChange={(event) =>
             table.getColumn("user_name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="w-full sm:max-w-xs"
         />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -149,20 +152,23 @@ export default function SellerOrders() {
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
-                  {column.id}
+                  {column.id.replace(/_/g, " ")}
                 </DropdownMenuCheckboxItem>
               ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-xl border shadow-sm overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="text-xs text-muted-foreground"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -174,15 +180,16 @@ export default function SellerOrders() {
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className="hover:bg-muted/30 transition">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
+                      className="cursor-pointer text-sm"
                       onClick={() => handleOrderDetail(cell)}
-                      className="cursor-pointer"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -196,7 +203,7 @@ export default function SellerOrders() {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center h-24"
+                  className="text-center text-muted-foreground py-8"
                 >
                   No orders found.
                 </TableCell>
@@ -206,9 +213,25 @@ export default function SellerOrders() {
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} order(s)
+      <div className="flex items-center justify-between mt-6 text-sm text-muted-foreground">
+        <div>Showing {table.getFilteredRowModel().rows.length} order(s)</div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
         </div>
       </div>
     </div>

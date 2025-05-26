@@ -21,6 +21,7 @@ import { useNavigate } from "react-router";
 export default function SellerProductAdd() {
   const navigate = useNavigate();
   const { toast } = useToast();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -48,12 +49,12 @@ export default function SellerProductAdd() {
   };
 
   const { data: categories, isLoading: loadingCatagories } = useQuery({
-    queryFn: () => getCatagories(),
+    queryFn: getCatagories,
     queryKey: ["catagories"],
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (data) => addnewProduct(data),
+    mutationFn: addnewProduct,
     mutationKey: ["addproduct"],
     onSuccess: () => {
       toast({
@@ -87,144 +88,161 @@ export default function SellerProductAdd() {
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude),
     };
-
-    await mutate(data);
+    mutate(data);
   };
 
   if (loadingCatagories) return <Loading />;
 
   return (
-    <Card className="max-w-xl mx-auto shadow-md">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Add New Product</CardTitle>
+    <Card className="max-w-2xl mx-auto p-6 shadow-lg border rounded-2xl">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold text-center">
+          🛒 Add New Product
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Product name"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Write a short product description..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Product Info */}
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="name">Product Name</Label>
               <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="99.99"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Stylish sneakers..."
                 required
-                min={10}
               />
             </div>
 
             <div>
-              <Label htmlFor="stock">Stock Quantity</Label>
-              <Input
-                id="stock"
-                type="number"
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
-                placeholder="10"
-                required
-                min={1}
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Write a brief product description..."
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="99.99"
+                  required
+                  min={1}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="stock">Stock</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  value={stockQuantity}
+                  onChange={(e) => setStockQuantity(e.target.value)}
+                  placeholder="e.g. 100"
+                  required
+                  min={1}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={categoryId}
+                onValueChange={setCategoryId}
+                disabled={loadingCatagories}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories?.data.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="productimg">Product Image</Label>
+              <Input
+                id="productimg"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setProductimg(e.target.files[0])}
+              />
+              {productimg && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Selected: {productimg.name}
+                </p>
+              )}
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Select
-              value={categoryId}
-              onValueChange={setCategoryId}
-              disabled={loadingCatagories}
+          {/* Location Info */}
+          <div className="pt-4 space-y-4 border-t">
+            <div>
+              <Label htmlFor="locationName">Location Name</Label>
+              <Input
+                id="locationName"
+                value={locationName}
+                onChange={(e) => setLocationName(e.target.value)}
+                placeholder="e.g. Addis Ababa"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input
+                  id="latitude"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  placeholder="9.03"
+                />
+              </div>
+              <div>
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input
+                  id="longitude"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  placeholder="38.74"
+                />
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              type="button"
+              onClick={handleGetLocation}
+              className="w-full"
             >
-              <SelectTrigger id="category" className="w-full">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories?.data.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              📍 Auto-Fill Location
+            </Button>
           </div>
 
-          <div>
-            <Label htmlFor="productimg">Product Image</Label>
-            <Input
-              id="productimg"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setProductimg(e.target.files[0])}
-            />
-            {productimg && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Selected: {productimg.name}
-              </p>
-            )}
+          {/* Actions */}
+          <div className="pt-6">
+            <Button
+              type="submit"
+              className="w-full text-lg"
+              disabled={isPending}
+            >
+              {isPending ? "Adding..." : "➕ Add Product"}
+            </Button>
           </div>
-          <div>
-            <Label htmlFor="locationName">Location Name</Label>
-            <Input
-              id="locationName"
-              value={locationName}
-              onChange={(e) => setLocationName(e.target.value)}
-              placeholder="e.g. Addis Ababa"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="latitude">Latitude</Label>
-              <Input
-                id="latitude"
-                type="text"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
-                placeholder="e.g. 9.03"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="longitude">Longitude</Label>
-              <Input
-                id="longitude"
-                type="text"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
-                placeholder="e.g. 38.74"
-              />
-            </div>
-          </div>
-
-          <Button type="button" onClick={handleGetLocation}>
-            📍 Get My Location
-          </Button>
-
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Adding Product..." : "Add Product"}
-          </Button>
         </form>
       </CardContent>
     </Card>
