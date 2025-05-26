@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOrder, updateOrderItemStatus } from "@/services/orders";
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -23,30 +22,28 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function SellerOrderDetail() {
   const [productId, setProductId] = useState(null);
-  const [prodyuctlat, setProducTlat] = useState(null);
-  const [productlng, setProductlng] = useState(null);
+  const [productLat, setProductLat] = useState(null);
+  const [productLng, setProductLng] = useState(null);
   const { id } = useParams();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { mutate: mutateStatus, isPending: isUpdatingStatus } = useMutation({
     mutationFn: updateOrderItemStatus,
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
       toast({
         title: "Success",
-        description: "order status updated sucessfully",
+        description: "Order item status updated successfully.",
       });
       queryClient.invalidateQueries(["order", id]);
     },
     onError: (err) => {
       toast({
         title: "Error",
-        description:
-          err?.message || "An unexpected error occurred during sign up.",
+        description: err?.message || "An unexpected error occurred.",
         variant: "destructive",
       });
-      console.error("Error updating order status:", err.message);
+      console.error("Error updating order item status:", err.message);
     },
   });
 
@@ -61,11 +58,10 @@ export default function SellerOrderDetail() {
     enabled: !!id,
   });
 
-  const handleMapview = (data) => {
-    const { id, lat, lng } = data;
+  const handleMapView = ({ id, lat, lng }) => {
     setProductId(id);
-    setProducTlat(lat);
-    setProductlng(lng);
+    setProductLat(lat);
+    setProductLng(lng);
   };
 
   if (isLoading) {
@@ -77,83 +73,96 @@ export default function SellerOrderDetail() {
     );
   }
 
-  if (isError) return <p className="text-red-600">Error: {error.message}</p>;
+  if (isError) {
+    return <p className="text-red-600">Error: {error.message}</p>;
+  }
 
   const { user, order_items, status, tracking_status, total_amount } = order;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 h-dvh">
       {/* LEFT SIDE - Order Info */}
-      <Card className="">
+      <Card>
         <CardHeader>
           <CardTitle>Order Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm">
+        <CardContent className="space-y-6 text-sm">
+          {/* Customer Info */}
           <div>
-            <h3 className="font-semibold text-base">Customer Info</h3>
-            <p>Name: {user?.name}</p>
-            <p>Email: {user?.email}</p>
-            <p>Phone: {user?.phone}</p>
+            <h3 className="font-semibold text-base mb-1">Customer Info</h3>
+            <p>
+              <strong>Name:</strong> {user?.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {user?.email}
+            </p>
+            <p>
+              <strong>Phone:</strong> {user?.phone}
+            </p>
           </div>
 
           <Separator />
 
+          {/* Order Items */}
           <div>
             <h3 className="font-semibold text-base mb-1">
               Order Items ({order_items.length})
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {order_items.map((item) => (
-                <div key={item.id} className="flex gap-4 items-start">
+                <div
+                  key={item.id}
+                  className="flex gap-4 items-start p-2 border rounded-lg"
+                >
                   <img
                     src={item.product_info?.image_url}
                     alt={item.product_info?.name}
                     className="w-24 h-24 object-cover rounded-md border"
                   />
-                  <div className="space-y-1">
+                  <div className="space-y-1 flex-1">
                     <p className="font-medium">{item.product_info?.name}</p>
                     <p>Price: {formatPrice(item.product_info?.price)}</p>
                     <p>Quantity: {item.quantity}</p>
-                    <p>Status: {item.status}</p>
-                    <div>
+                    <p>
+                      Status: <Badge>{item.status}</Badge>
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center mt-2">
                       <Select
                         onValueChange={(value) =>
-                          mutateStatus({
-                            id: item.id,
-                            status: value,
-                          })
+                          mutateStatus({ id: item.id, status: value })
                         }
+                        disabled={isUpdatingStatus}
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Update Status of order item" />
+                          <SelectValue placeholder="Update Status" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectLabel>
-                              Select Status for order item
-                            </SelectLabel>
+                            <SelectLabel>Status Options</SelectLabel>
                             <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="conformed">conformed</SelectItem>
-                            <SelectItem value="deleiverd">deleiverd</SelectItem>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="delivered">Delivered</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
+
+                      {item.status !== "delivered" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleMapView({
+                              id: item.product_info.id,
+                              lat: item.product_info.latitude,
+                              lng: item.product_info.longitude,
+                            })
+                          }
+                        >
+                          Show on Map
+                        </Button>
+                      )}
                     </div>
-                    {item.status !== "delivered" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleMapview({
-                            id: item.product_info.id,
-                            lat: item.product_info.latitude,
-                            lng: item.product_info.longitude,
-                          })
-                        }
-                      >
-                        Show on Map
-                      </Button>
-                    )}
                   </div>
                 </div>
               ))}
@@ -162,6 +171,7 @@ export default function SellerOrderDetail() {
 
           <Separator />
 
+          {/* Summary */}
           <div className="space-y-1">
             <p>
               <strong>Status:</strong> <Badge>{status}</Badge>
@@ -186,8 +196,8 @@ export default function SellerOrderDetail() {
             <SellerMapView
               order={order}
               product={productId}
-              prodyuctlat={prodyuctlat}
-              productlng={productlng}
+              prodyuctlat={productLat}
+              productlng={productLng}
             />
           ) : (
             <div className="h-80 flex items-center justify-center text-muted-foreground">

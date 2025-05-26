@@ -8,7 +8,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -53,6 +52,7 @@ export default function SellerProducts() {
     queryKey: ["products"],
     queryFn: () => getallProducts(),
   });
+
   const { mutate } = useMutation({
     mutationKey: ["productdelete"],
     mutationFn: (id) => {
@@ -63,13 +63,13 @@ export default function SellerProducts() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: "Success",
-        description: "Product Deleted Sucessfully!",
+        description: "Product Deleted Successfully!",
       });
     },
     onError: (err) => {
       toast({
         title: "Error",
-        description: err.message || "something went wrong!",
+        description: err.message || "Something went wrong!",
         variant: "destructive",
       });
     },
@@ -77,28 +77,23 @@ export default function SellerProducts() {
 
   const dispatch = useDispatch();
 
-  const handledelete = (id) => {
-    if (!id) return;
-    console.log(id);
-    mutate(id);
-  };
-
+  const handleDelete = (id) => mutate(id);
   const handleEdit = (id) => {
     dispatch(setProductId(id));
     dispatch(getProductdata(id));
     setOpen(true);
   };
+
   const columns = [
     {
       accessorKey: "image_url",
       header: "Image",
       cell: ({ row }) => (
-        <div className="capitalize">
-          <img
-            src={row.getValue("image_url")}
-            className="size-10 rounded-md shadow-md"
-          />
-        </div>
+        <img
+          src={row.getValue("image_url")}
+          className="size-12 rounded-lg object-cover border shadow"
+          alt="Product"
+        />
       ),
     },
     {
@@ -108,11 +103,11 @@ export default function SellerProducts() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name <ArrowUpDown />
+          Name <ArrowUpDown className="ml-2 size-4" />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("name")}</div>
+        <div className="font-medium">{row.getValue("name")}</div>
       ),
     },
     {
@@ -122,7 +117,7 @@ export default function SellerProducts() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Price <ArrowUpDown />
+          Price <ArrowUpDown className="ml-2 size-4" />
         </Button>
       ),
       cell: ({ row }) => {
@@ -131,27 +126,21 @@ export default function SellerProducts() {
           style: "currency",
           currency: "ETB",
         }).format(amount);
-
         return <div>{formatted}</div>;
       },
     },
     {
       accessorKey: "stock_quantity",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "des")}
-        >
-          Stock Quantity <ArrowUpDown />
-        </Button>
-      ),
+      header: "Stock",
       cell: ({ row }) => <div>{row.getValue("stock_quantity")} pcs</div>,
     },
     {
       accessorKey: "location_name",
       header: "Location",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("location_name")}</div>
+        <div className="capitalize text-sm">
+          {row.getValue("location_name")}
+        </div>
       ),
     },
     {
@@ -159,12 +148,10 @@ export default function SellerProducts() {
       enableHiding: false,
       cell: ({ row }) => {
         const product = row.original;
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
@@ -173,23 +160,21 @@ export default function SellerProducts() {
               <DropdownMenuItem
                 onClick={() => navigator.clipboard.writeText(product.name)}
               >
-                Copy product Name
+                Copy Name
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  console.log(product);
                   setSelectedProduct(product);
                   setShowDetail(true);
                 }}
               >
-                Product Detail
+                View Details
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEdit(product.id)}>
-                Edit product
+                Edit
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handledelete(product.id)}>
-                Delete product
+              <DropdownMenuItem onClick={() => handleDelete(product.id)}>
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -220,78 +205,75 @@ export default function SellerProducts() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto  px-4">
       <ProductDetailModal
         isOpen={showDetail}
         onClose={() => setShowDetail(false)}
         product={selectedProduct}
       />
-
-      <Popup title={"Edit the Product"}>
+      <Popup title="Edit Product">
         <SellerProductEdit />
       </Popup>
-      <div className="flex items-center py-4">
+
+      <h2 className="text-3xl font-bold text-center mb-6">My Products</h2>
+
+      <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
         <Input
-          placeholder="Filter Products..."
+          placeholder="Filter products..."
           value={table.getColumn("name")?.getFilterValue() ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+          onChange={(e) =>
+            table.getColumn("name")?.setFilterValue(e.target.value)
           }
-          className="max-w-sm"
+          className="max-w-xs"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
+            <Button variant="outline">
+              Columns <ChevronDown className="ml-1" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              .filter((col) => col.getCanHide())
+              .map((col) => (
+                <DropdownMenuCheckboxItem
+                  key={col.id}
+                  className="capitalize"
+                  checked={col.getIsVisible()}
+                  onCheckedChange={(value) => col.toggleVisibility(!!value)}
+                >
+                  {col.id}
+                </DropdownMenuCheckboxItem>
+              ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
+
+      <div className="rounded-lg border shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-muted/50 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -307,20 +289,21 @@ export default function SellerProducts() {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-muted-foreground"
                 >
-                  No results.
+                  No products found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} row
+
+      <div className="flex items-center justify-between py-4">
+        <div className="text-sm text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} products
         </div>
-        {/* <div className="space-x-2">
+        <div className="space-x-2">
           <Button
             variant="outline"
             size="sm"
@@ -337,7 +320,7 @@ export default function SellerProducts() {
           >
             Next
           </Button>
-        </div> */}
+        </div>
       </div>
     </div>
   );
