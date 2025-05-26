@@ -47,7 +47,6 @@ export default function Products() {
     queryKey: ["cart_items"],
     queryFn: () => getallcartstobuyer(),
   });
-  console.log(cart_items);
 
   const allProducts = data?.pages.flatMap((page) => page.data) || [];
   const isInCart = (productId) => {

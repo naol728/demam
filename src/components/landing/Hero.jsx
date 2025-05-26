@@ -7,7 +7,10 @@ const Hero = () => {
   const { user, role, loading } = useSelector((state) => state.user);
 
   return (
-    <section className="py-12 bg-gradient-to-br from-background/50 to-background">
+    <section
+      id="Home"
+      className="py-12 bg-gradient-to-br from-background/50 to-background"
+    >
       <div className="container mx-auto px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left">

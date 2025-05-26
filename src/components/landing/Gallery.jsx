@@ -84,7 +84,10 @@ const Gallery = ({
   }, [carouselApi]);
 
   return (
-    <section className="py-24 bg-gradient-to-b from-background/50 to-background">
+    <section
+      id="Gallery"
+      className="py-24 bg-gradient-to-b from-background/50 to-background"
+    >
       <div className="container mx-auto px-6">
         <div className="mb-12 flex flex-col-reverse items-center justify-between gap-6 md:flex-row md:mb-16">
           <div className="max-w-xl text-center md:text-left">

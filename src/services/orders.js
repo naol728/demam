@@ -180,6 +180,7 @@ export const createAnOrder = async ({ latitude, longitude, location }) => {
       product_info: item.product_id,
       seller_id: item.product.seller_id,
       quantity: item.quantity,
+      status: "pending",
       price: item.product.price,
     }));
 
