@@ -1,17 +1,7 @@
 import supabase from "./supabase";
 
-export const getAllproductstobuyer = async (page = 1, limit = 10) => {
+export const getAllProductsforlanding = async (page = 1, limit = 12) => {
   try {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-
-    if (error) throw new Error(error.message);
-
-    const userId = session?.user?.id;
-    if (!userId) throw new Error("User ID not found");
-
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
@@ -51,6 +41,65 @@ export const getAllproductstobuyer = async (page = 1, limit = 10) => {
     };
   } catch (err) {
     throw new Error(err.message);
+  }
+};
+
+export const getAllproductstobuyer = async (page = 1, limit = 10) => {
+  try {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) throw new Error(error.message);
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("User ID not found");
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const {
+      data,
+      error: fetchError,
+      count,
+    } = await supabase
+      .from("products")
+      .select(
+        `
+        *,
+        user:seller_id (
+          id,
+          name,
+          phone,
+          email,
+          profileimg
+        ),
+        catagory:category_id (
+          name
+        )
+      `,
+        { count: "exact" }
+      )
+      .range(from, to)
+      .order("created_at", { ascending: false });
+
+    if (fetchError) throw new Error(fetchError.message);
+
+    const totalPages = count ? Math.ceil(count / limit) : 1;
+
+    return {
+      data: data || [],
+      page,
+      totalPages,
+    };
+  } catch (err) {
+    console.error("getAllproductstobuyer error:", err.message);
+    return {
+      data: [],
+      page,
+      totalPages: 1,
+    };
   }
 };
 

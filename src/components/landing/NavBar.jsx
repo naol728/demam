@@ -38,10 +38,10 @@ import { clearUser } from "@/store/user/userslice";
 const NavBar = ({
   logo = { url: "/", src: "logo.jpg", alt: "logo", title: "Demam Platform" },
   menu = [
-    { title: "Home", url: "/" },
-    { title: "Featured", url: "/#Featured" },
-    { title: "Products", url: "/#Products" },
-    { title: "Testemonial", url: "/#Testemonial" },
+    { title: "Home", url: "#Home" },
+    { title: "Gallery", url: "#Gallery" },
+    { title: "Products", url: "#Products" },
+    { title: "Testimonial", url: "#Testimonial" },
   ],
   auth = {
     login: { title: "Sign in", url: "/signin" },
@@ -52,118 +52,114 @@ const NavBar = ({
   const { user, role, loading } = useSelector((state) => state.user);
 
   return (
-    <section className="">
-      <div className="container shadow-md py-3 px-2 fixed w-full bg-background/90 backdrop-blur-md z-50 border-b border-border-200">
-        {/* Desktop Menu */}
-        <nav className="hidden justify-between lg:flex">
-          <div className="flex items-center gap-6">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 font-medium">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <GalleryVerticalEnd className="size-4" />
-              </div>
-              Demam Platform
-            </Link>
-            <div className="flex items-center">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {menu.map(
-                    (item) => renderMenuItem(item, location.pathname) // pass current path
-                  )}
-                </NavigationMenuList>
-              </NavigationMenu>
+    <div className="container shadow-md py-3 px-2 fixed w-full bg-background/90 backdrop-blur-md z-50 border-b border-border-200">
+      {/* Desktop Menu */}
+      <nav className="hidden justify-between lg:flex">
+        <div className="flex items-center gap-6">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 font-medium">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <GalleryVerticalEnd className="size-4" />
             </div>
-          </div>
-
-          {/* Right Buttons */}
-          <div className="flex gap-2">
-            {!loading &&
-              (role ? (
-                <Button asChild size="sm">
-                  {role === "seller" ? (
-                    <Link to="/dashboard/products">Dashboard</Link>
-                  ) : (
-                    <Link to="/products">Shop Now</Link>
-                  )}
-                </Button>
-              ) : (
-                <>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to={auth.login.url}>{auth.login.title}</Link>
-                  </Button>
-                  <Button asChild size="sm">
-                    <Link to={auth.signup.url}>{auth.signup.title}</Link>
-                  </Button>
-                </>
-              ))}
-          </div>
-        </nav>
-
-        {/* Mobile Menu */}
-        <div className="block lg:hidden">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 font-medium">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <GalleryVerticalEnd className="size-4" />
-              </div>
-              Demam Platform
-            </Link>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>
-                    <Link to={logo.url} className="flex items-center gap-2">
-                      <GalleryVerticalEnd className="size-4" />
-                    </Link>
-                  </SheetTitle>
-                </SheetHeader>
-
-                <div className="flex flex-col gap-6 p-4">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
-                  >
-                    {menu.map(
-                      (item) => renderMobileMenuItem(item, location.pathname) // pass current path
-                    )}
-                  </Accordion>
-
-                  <div className="flex flex-col gap-3">
-                    {!loading &&
-                      (role ? (
-                        <Button asChild size="sm">
-                          {role === "seller" ? (
-                            <Link to="/dashboard/products">Dashboard</Link>
-                          ) : (
-                            <Link to="/products">Shop Now</Link>
-                          )}
-                        </Button>
-                      ) : (
-                        <>
-                          <Button asChild variant="outline" size="sm">
-                            <Link to={auth.login.url}>{auth.login.title}</Link>
-                          </Button>
-                          <Button asChild size="sm">
-                            <Link to={auth.signup.url}>
-                              {auth.signup.title}
-                            </Link>
-                          </Button>
-                        </>
-                      ))}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            Demam Platform
+          </Link>
+          <div className="flex items-center">
+            <NavigationMenu>
+              <NavigationMenuList>
+                {menu.map(
+                  (item) => renderMenuItem(item, location.pathname) // pass current path
+                )}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
         </div>
+
+        {/* Right Buttons */}
+        <div className="flex gap-2">
+          {!loading &&
+            (role ? (
+              <Button asChild size="sm">
+                {role === "seller" ? (
+                  <Link to="/dashboard/products">Dashboard</Link>
+                ) : (
+                  <Link to="/products">Shop Now</Link>
+                )}
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={auth.login.url}>{auth.login.title}</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                </Button>
+              </>
+            ))}
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      <div className="block lg:hidden">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 font-medium">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <GalleryVerticalEnd className="size-4" />
+            </div>
+            Demam Platform
+          </Link>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Menu className="size-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>
+                  <Link to={logo.url} className="flex items-center gap-2">
+                    <GalleryVerticalEnd className="size-4" />
+                  </Link>
+                </SheetTitle>
+              </SheetHeader>
+
+              <div className="flex flex-col gap-6 p-4">
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="flex w-full flex-col gap-4"
+                >
+                  {menu.map(
+                    (item) => renderMobileMenuItem(item, location.pathname) // pass current path
+                  )}
+                </Accordion>
+
+                <div className="flex flex-col gap-3">
+                  {!loading &&
+                    (role ? (
+                      <Button asChild size="sm">
+                        {role === "seller" ? (
+                          <Link to="/dashboard/products">Dashboard</Link>
+                        ) : (
+                          <Link to="/products">Shop Now</Link>
+                        )}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline" size="sm">
+                          <Link to={auth.login.url}>{auth.login.title}</Link>
+                        </Button>
+                        <Button asChild size="sm">
+                          <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                        </Button>
+                      </>
+                    ))}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 
