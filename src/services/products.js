@@ -322,6 +322,12 @@ export const deleteProduct = async (productId) => {
 
     return { success: true, message: "Product deleted successfully." };
   } catch (err) {
+    if (
+      error.message?.includes("violates foreign key constraint") &&
+      error.message?.includes("order_items_product_info_fkey")
+    ) {
+      throw new Error("Cannot delete product: it's part of an order.");
+    }
     throw new Error(err.message);
   }
 };
