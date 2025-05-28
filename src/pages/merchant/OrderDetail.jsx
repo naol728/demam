@@ -208,9 +208,13 @@ export default function OrderDetail() {
                   </Select>
                   {paymentMap[item.id] ? (
                     <div className="space-y-1 text-sm">
-                      <Badge variant="secondary">
-                        Payment Status: {paymentMap[item.id].status}
-                      </Badge>
+                      <div>
+                        <strong>Payment Status:</strong>
+                        <Badge variant="outline">
+                          {paymentMap[item.id].status}
+                        </Badge>
+                      </div>
+
                       <div>
                         <strong>Amount:</strong>{" "}
                         {formatPrice(paymentMap[item.id].amount)}
@@ -225,6 +229,10 @@ export default function OrderDetail() {
                           paymentMap[item.id].created_at
                         ).toLocaleString()}
                       </div>
+
+                      <Button variant="outline" size="sm">
+                        update payment
+                      </Button>
                     </div>
                   ) : (
                     <Button

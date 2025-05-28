@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useParams } from "react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { getOrder, updateOrderItemStatus } from "@/services/orders";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +24,9 @@ import {
 import SellerMapView from "./SellerMapView";
 import { formatPrice } from "@/lib/formater";
 import { useToast } from "@/hooks/use-toast";
+import { getPaymentsByOrderId } from "@/services/payment";
+import SellerPaymentInfoDialog from "./SellerPaymentInfoDialog";
+import { DialogTrigger } from "@/components/ui/dialog";
 
 export default function SellerOrderDetail() {
   const [productId, setProductId] = useState(null);
@@ -27,6 +35,7 @@ export default function SellerOrderDetail() {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [open, setOpen] = useState();
 
   const { mutate: mutateStatus, isPending: isUpdatingStatus } = useMutation({
     mutationFn: updateOrderItemStatus,
@@ -57,6 +66,29 @@ export default function SellerOrderDetail() {
     queryFn: () => getOrder(id),
     enabled: !!id,
   });
+  const paymentResults = useQueries({
+    queries:
+      order?.order_items.map((item) => ({
+        queryKey: ["payment_info", item.id],
+        queryFn: () => getPaymentsByOrderId(item.id),
+        enabled: !!item.id,
+      })) || [],
+  });
+
+  const paymentMap = {};
+
+  if (
+    order?.order_items &&
+    paymentResults.length === order.order_items.length
+  ) {
+    order.order_items.forEach((item, index) => {
+      const result = paymentResults[index];
+      const firstPayment = result?.data?.[0];
+      if (firstPayment) {
+        paymentMap[item.id] = firstPayment;
+      }
+    });
+  }
 
   const handleMapView = ({ id, lat, lng }) => {
     setProductId(id);
@@ -85,56 +117,91 @@ export default function SellerOrderDetail() {
         <CardHeader>
           <CardTitle>Order Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6 text-sm">
+        <CardContent className="space-y-8 text-sm">
           {/* Customer Info */}
-          <div>
-            <h3 className="font-semibold text-base mb-1">Customer Info</h3>
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold text-primary">
+              Customer Information
+            </h3>
             <p>
-              <strong>Name:</strong> {user?.name}
+              <span className="font-medium">Name:</span> {user?.name}
             </p>
             <p>
-              <strong>Email:</strong> {user?.email}
+              <span className="font-medium">Email:</span> {user?.email}
             </p>
             <p>
-              <strong>Phone:</strong> {user?.phone}
+              <span className="font-medium">Phone:</span> {user?.phone}
             </p>
           </div>
 
           <Separator />
 
           {/* Order Items */}
-          <div>
-            <h3 className="font-semibold text-base mb-1">
-              Order Items ({order_items.length})
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-primary">
+              Ordered Items ({order_items.length})
             </h3>
-            <div className="space-y-6">
-              {order_items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 items-start p-2 border rounded-lg"
-                >
+            {order_items.map((item) => (
+              <Card key={item.id} className="border p-4">
+                <div className="flex flex-col md:flex-row gap-4">
                   <img
                     src={item.product_info?.image_url}
                     alt={item.product_info?.name}
-                    className="w-24 h-24 object-cover rounded-md border"
+                    className="w-full md:w-24 h-24 object-cover rounded-md border"
                   />
-                  <div className="space-y-1 flex-1">
-                    <p className="font-medium">{item.product_info?.name}</p>
-                    <p>Price: {formatPrice(item.product_info?.price)}</p>
-                    <p>Quantity: {item.quantity}</p>
-                    <p>
-                      Status: <Badge>{item.status}</Badge>
+                  <div className="flex-1 space-y-1">
+                    <h4 className="text-base font-semibold">
+                      {item.product_info?.name}
+                    </h4>
+                    <p className="text-muted-foreground">
+                      <span className="font-medium">Price:</span>{" "}
+                      {formatPrice(item.product_info?.price)} &nbsp;|&nbsp;
+                      <span className="font-medium">Quantity:</span>{" "}
+                      {item.quantity}
                     </p>
-                    <p>
-                      Seller status:{" "}
-                      <Badge variant="outline">{item.seller_status}</Badge>
-                    </p>
-                    <p>
-                      Buyer status:{" "}
-                      <Badge variant="outline">{item.buyer_status}</Badge>
-                    </p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <Badge>Status: {item.status}</Badge>
+                      <Badge variant="outline">
+                        Seller: {item.seller_status}
+                      </Badge>
+                      <Badge variant="outline">
+                        Buyer: {item.buyer_status}
+                      </Badge>
+                    </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center mt-2">
+                    {paymentMap[item.id] ? (
+                      <div className="mt-2 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="success">
+                            Payment: {paymentMap[item.id].status}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setOpen(true)}
+                          >
+                            View Payment Info
+                          </Button>
+                        </div>
+                        <SellerPaymentInfoDialog
+                          open={open}
+                          onOpenChange={setOpen}
+                          id={paymentMap[item.id].id}
+                          image={paymentMap[item.id].payment_img}
+                          amount={formatPrice(paymentMap[item.id].amount)}
+                          date={new Date(
+                            paymentMap[item.id].created_at
+                          ).toLocaleString()}
+                          method={paymentMap[item.id].payment_method}
+                        />
+                      </div>
+                    ) : (
+                      <div className="mt-2">
+                        <Badge variant="secondary">Payment: Not Paid</Badge>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center mt-4">
                       <Select
                         onValueChange={(value) =>
                           mutateStatus({ id: item.id, seller_status: value })
@@ -142,7 +209,7 @@ export default function SellerOrderDetail() {
                         disabled={isUpdatingStatus}
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Update your Status" />
+                          <SelectValue placeholder="Update Status" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
@@ -156,7 +223,7 @@ export default function SellerOrderDetail() {
 
                       {item.status !== "delivered" && (
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           onClick={() =>
                             handleMapView({
@@ -172,22 +239,27 @@ export default function SellerOrderDetail() {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </Card>
+            ))}
           </div>
 
           <Separator />
 
-          {/* Summary */}
-          <div className="space-y-1">
+          {/* Order Summary */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-primary">
+              Order Summary
+            </h3>
             <p>
-              <strong>Status:</strong> <Badge>{status}</Badge>
+              <span className="font-medium">Order Status:</span>{" "}
+              <Badge>{status}</Badge>
             </p>
             <p>
-              <strong>Tracking Status:</strong> {tracking_status}
+              <span className="font-medium">Tracking:</span> {tracking_status}
             </p>
             <p>
-              <strong>Total:</strong> {formatPrice(total_amount)}
+              <span className="font-medium">Total Amount:</span>{" "}
+              {formatPrice(total_amount)}
             </p>
           </div>
         </CardContent>
