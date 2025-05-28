@@ -277,6 +277,7 @@ export const getOrderById = async (id) => {
             longitude,
             latitude,
             location_name,
+            payment_method,
             seller:seller_id(
             name,
             email,
