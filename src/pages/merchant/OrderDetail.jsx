@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import PaymentDialog from "./PaymentDialog";
 import { getPaymentsByOrderId } from "@/services/payment";
+import UpdatePaymentStatusDialog from "./UpdatePaymentStatusDialog";
 
 export default function OrderDetail() {
   const [productId, setProductId] = useState(null);
@@ -34,6 +35,7 @@ export default function OrderDetail() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrderItemId, setSelectedOrderItemId] = useState(null);
   const queryClient = useQueryClient();
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: order, isLoading } = useQuery({
@@ -230,7 +232,18 @@ export default function OrderDetail() {
                         ).toLocaleString()}
                       </div>
 
-                      <Button variant="outline" size="sm">
+                      <UpdatePaymentStatusDialog
+                        open={isUpdateDialogOpen}
+                        onOpenChange={setIsUpdateDialogOpen}
+                        method={paymentMap[item.id].payment_method}
+                        amount={paymentMap[item.id].amount}
+                      />
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsUpdateDialogOpen(true)}
+                      >
                         update payment
                       </Button>
                     </div>

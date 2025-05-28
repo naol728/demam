@@ -104,3 +104,26 @@ export const updatePaymentStatustobuyer = async (data) => {
     throw new Error(err.message);
   }
 };
+
+
+export const updatepayment = async (data) => {
+  try {
+    const { id } = data;
+
+    if (!id) {
+      throw new Error("Payment ID  are required.");
+    }
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+    if (sessionError) throw new Error(sessionError.message);
+
+    const userId = session?.user?.id;
+
+    if (!userId) throw new Error("User ID not found");
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
