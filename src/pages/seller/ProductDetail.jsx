@@ -57,6 +57,11 @@ export default function ProductDetailModal({ isOpen, onClose, product }) {
               <strong>Category:</strong> {product.category.name}
             </div>
           )}
+          {product.category?.name && (
+            <div className="text-sm">
+              <strong>Payment Methods:</strong> {product.payment_method}
+            </div>
+          )}
 
           {product.user && (
             <div className="text-sm space-y-1">

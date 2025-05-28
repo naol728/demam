@@ -148,6 +148,7 @@ export const addnewProduct = async (data) => {
       location_name,
       latitude,
       longitude,
+      payment_method,
     } = data;
 
     if (
@@ -158,7 +159,8 @@ export const addnewProduct = async (data) => {
       !category_id ||
       !image_url ||
       !latitude ||
-      !longitude
+      !longitude ||
+      !payment_method
     ) {
       throw new Error("Please fill all required fields.");
     }
@@ -208,6 +210,7 @@ export const addnewProduct = async (data) => {
           location_name,
           latitude,
           longitude,
+          payment_method,
         },
       ])
       .select();
