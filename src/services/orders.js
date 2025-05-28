@@ -88,6 +88,8 @@ export const getOrder = async (id) => {
       id,
       quantity,
       status,
+      seller_status,
+      buyer_status,
       product_info (
         id,
         name,
@@ -265,6 +267,8 @@ export const getOrderById = async (id) => {
           quantity,
           price,
           status,
+          buyer_status,
+          seller_status,
           product_info (
             id,
             name,
@@ -295,12 +299,31 @@ export const getOrderById = async (id) => {
 
 export const updateOrderItemStatus = async (data) => {
   try {
-    const { id, status } = data;
-    if (!id || !status) throw new Error("Missing item ID or status");
+    const { id, seller_status } = data;
+    if (!id || !seller_status) throw new Error("Missing item ID or status");
 
     const { data: updated, error } = await supabase
       .from("order_items")
-      .update({ status })
+      .update({ seller_status })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return { message: "Order item status updated", data: updated };
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+export const updateOrderItemStatustobuyer = async (data) => {
+  try {
+    const { id, buyer_status } = data;
+    if (!id || !buyer_status) throw new Error("Missing item ID or status");
+
+    const { data: updated, error } = await supabase
+      .from("order_items")
+      .update({ buyer_status })
       .eq("id", id)
       .select()
       .single();

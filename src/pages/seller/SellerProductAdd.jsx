@@ -31,6 +31,7 @@ export default function SellerProductAdd() {
   const [locationName, setLocationName] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [payment_method, setPaymentmethod] = useState("");
 
   const handleGetLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -87,6 +88,7 @@ export default function SellerProductAdd() {
       location_name: locationName,
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude),
+      payment_method,
     };
     mutate(data);
   };
@@ -152,6 +154,17 @@ export default function SellerProductAdd() {
                   min={1}
                 />
               </div>
+            </div>
+            <div>
+              <Label htmlFor="payment method">Payment Methods</Label>
+              <Input
+                id="payment_method"
+                type="text"
+                value={payment_method}
+                onChange={(e) => setPaymentmethod(e.target.value)}
+                placeholder="e.g. tele birr 0912345678"
+                required
+              />
             </div>
 
             <div>

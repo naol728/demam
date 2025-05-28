@@ -78,7 +78,6 @@ export default function SellerOrderDetail() {
   }
 
   const { user, order_items, status, tracking_status, total_amount } = order;
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 h-dvh">
       {/* LEFT SIDE - Order Info */}
@@ -126,16 +125,24 @@ export default function SellerOrderDetail() {
                     <p>
                       Status: <Badge>{item.status}</Badge>
                     </p>
+                    <p>
+                      Seller status:{" "}
+                      <Badge variant="outline">{item.seller_status}</Badge>
+                    </p>
+                    <p>
+                      Buyer status:{" "}
+                      <Badge variant="outline">{item.buyer_status}</Badge>
+                    </p>
 
                     <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center mt-2">
                       <Select
                         onValueChange={(value) =>
-                          mutateStatus({ id: item.id, status: value })
+                          mutateStatus({ id: item.id, seller_status: value })
                         }
                         disabled={isUpdatingStatus}
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Update Status" />
+                          <SelectValue placeholder="Update your Status" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>

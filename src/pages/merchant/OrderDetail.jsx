@@ -1,14 +1,24 @@
 // OrderDetail.jsx
 import React, { useState } from "react";
 import { useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
-import { getOrderById } from "@/services/orders";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getOrderById, updateOrderItemStatustobuyer } from "@/services/orders";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import MapView from "@/components/MapView";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/formater";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function OrderDetail() {
   const [productId, setProductId] = useState(null);
@@ -18,6 +28,27 @@ export default function OrderDetail() {
     queryKey: ["order_detail", id],
     queryFn: () => getOrderById(id),
     enabled: !!id,
+  });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { mutate: mutateStatus, isPending: isUpdatingStatus } = useMutation({
+    mutationFn: updateOrderItemStatustobuyer,
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Order item status updated successfully.",
+      });
+      queryClient.invalidateQueries(["order_detail", id]);
+    },
+    onError: (err) => {
+      toast({
+        title: "Error",
+        description: err?.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+      console.error("Error updating order item status:", err.message);
+    },
   });
 
   const handleMapview = (product) => {
@@ -94,8 +125,16 @@ export default function OrderDetail() {
                   {formatPrice(item.price)}
                 </p>
                 <p>
-                  <span className="font-medium">Status:</span>{" "}
+                  <span className="font-medium">Order Status:</span>{" "}
                   <Badge>{item.status}</Badge>
+                </p>
+                <p>
+                  <span className="font-medium">Seller Status:</span>{" "}
+                  <Badge variant={"outline"}>{item.seller_status}</Badge>
+                </p>
+                <p>
+                  <span className="font-medium">Buyer Status:</span>{" "}
+                  <Badge variant={"outline"}>{item.buyer_status}</Badge>
                 </p>
                 <p>
                   <span className="font-medium">Quantity:</span> {item.quantity}
@@ -116,14 +155,36 @@ export default function OrderDetail() {
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => handleMapview(item.product_info.id)}
-                >
-                  Show on Map
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center mt-2">
+                  <Select
+                    onValueChange={(value) =>
+                      mutateStatus({ id: item.id, buyer_status: value })
+                    }
+                    disabled={isUpdatingStatus}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Update your Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Status Options</SelectLabel>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+
+                  {item.status !== "delivered" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMapview(item.product_info.id)}
+                    >
+                      Show on Map
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
