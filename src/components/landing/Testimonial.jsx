@@ -8,7 +8,7 @@ const Testimonial = () => {
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 items-stretch gap-x-0 gap-y-4 lg:grid-cols-3 lg:gap-4">
             <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSM9OyOozyB9Wr5lJPnUiQK_oOcv11NN-LssQ&s"
+              src="https://uploads-garowe.s3.amazonaws.com/upload/images/Article/2023/1690730315/main/thumbnail.jpg"
               alt="testimonial"
               className="h-72 w-full rounded-md object-cover lg:h-auto"
             />
@@ -19,10 +19,8 @@ const Testimonial = () => {
                   online store. Managing inventory and sales is now effortless.
                 </q>
                 <div className="flex flex-col items-start">
-                  <p>Salem Ayele</p>
-                  <p className="text-muted-foreground">
-                    Owner, Salem Accessories
-                  </p>
+                  <p>shek alhamudein</p>
+                  <p className="text-muted-foreground">Owner, Medroc owner</p>
                 </div>
               </div>
             </Card>

@@ -114,7 +114,7 @@ export default function SellerPaymentInfoDialog({
                   <SelectGroup>
                     <SelectLabel>Status Options</SelectLabel>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="recived">Recived</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
