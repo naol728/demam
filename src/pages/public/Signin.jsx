@@ -140,7 +140,7 @@ export default function Signin() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         <img
-          src="/login2.jpg"
+          src="https://i.pinimg.com/736x/c0/f4/9a/c0f49acf9b16b3bcd4d73a2331a636fa.jpg"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.6] "
         />
