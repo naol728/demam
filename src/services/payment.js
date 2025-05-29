@@ -105,13 +105,10 @@ export const updatePaymentStatustobuyer = async (data) => {
   }
 };
 
-
-export const updatepayment = async (data) => {
+export const updatepayment = async ({ id, payment_method, amount, file }) => {
   try {
-    const { id } = data;
-
     if (!id) {
-      throw new Error("Payment ID  are required.");
+      throw new Error("Payment ID is required.");
     }
 
     const {
@@ -121,9 +118,45 @@ export const updatepayment = async (data) => {
     if (sessionError) throw new Error(sessionError.message);
 
     const userId = session?.user?.id;
+    if (!userId) throw new Error("User ID not found.");
 
-    if (!userId) throw new Error("User ID not found");
+    let payment_img = null;
+
+    if (file) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `receipts/${userId}/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("payment")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw new Error("Failed to upload receipt image.");
+      }
+      const { data: publicUrlData } = supabase.storage
+        .from("payment")
+        .getPublicUrl(filePath);
+      payment_img = publicUrlData.publicUrl;
+    }
+
+    // Update the payment record
+    const { error: updateError } = await supabase
+      .from("payments")
+      .update({
+        ...(payment_method && { payment_method }),
+        ...(amount && { amount: parseFloat(amount) }),
+        ...(payment_img && { payment_img }),
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return true;
   } catch (err) {
-    throw new Error(err.message);
+    console.log(err);
+    throw new Error(err.message || "Failed to update payment.");
   }
 };

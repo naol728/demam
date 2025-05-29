@@ -20,6 +20,7 @@ export default function UpdatePaymentStatusDialog({
   paymentId,
   method,
   amount,
+  id,
 }) {
   const [paymentMethod, setPaymentMethod] = useState(method);
   const [paymentAmount, setPaymentAmount] = useState(amount);
@@ -39,6 +40,7 @@ export default function UpdatePaymentStatusDialog({
       onOpenChange(false);
     },
     onError: (err) => {
+      console.log(err);
       toast({
         title: "Error",
         description: err?.message || "An unexpected error occurred.",
@@ -46,7 +48,14 @@ export default function UpdatePaymentStatusDialog({
       });
     },
   });
-  const handleupdate = () => {};
+  const handleupdate = () => {
+    updatepaymentinfo({
+      id,
+      payment_method: paymentMethod,
+      amount: paymentAmount,
+      file,
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -231,13 +231,25 @@ export default function OrderDetail() {
                           paymentMap[item.id].created_at
                         ).toLocaleString()}
                       </div>
-
-                      <UpdatePaymentStatusDialog
-                        open={isUpdateDialogOpen}
-                        onOpenChange={setIsUpdateDialogOpen}
-                        method={paymentMap[item.id].payment_method}
-                        amount={paymentMap[item.id].amount}
-                      />
+                      <div>
+                        <strong>Payment Image:</strong>
+                        <img
+                          src={paymentMap[item.id].payment_img}
+                          className="w-24 h-24 object-cover rounded-lg mt-2"
+                          alt="payment image"
+                        />
+                      </div>
+                      {paymentMap[item.id].status === "confirmed" ? (
+                        <></>
+                      ) : (
+                        <UpdatePaymentStatusDialog
+                          open={isUpdateDialogOpen}
+                          onOpenChange={setIsUpdateDialogOpen}
+                          method={paymentMap[item.id].payment_method}
+                          amount={paymentMap[item.id].amount}
+                          id={paymentMap[item.id].id}
+                        />
+                      )}
 
                       <Button
                         variant="outline"

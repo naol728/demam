@@ -3,9 +3,9 @@ import Signup from "./pages/public/Signup";
 import LandingPage from "./pages/public/LandingPage";
 import Signin from "./pages/public/Signin";
 import Protectedroute from "./layout/Protectedroute";
-import Products from "./pages/merchant/Products";
-import Orders from "./pages/merchant/Orders";
-import Cart from "./pages/merchant/Cart";
+import Products from "./pages/buyer/Products";
+import Orders from "./pages/buyer/Orders";
+import Cart from "./pages/buyer/Cart";
 import MainLayout from "./layout/MainLayout";
 import { useDispatch } from "react-redux";
 import { fetchUser } from "./store/user/userslice";
@@ -19,7 +19,7 @@ import SellerProductAdd from "./pages/seller/SellerProductAdd";
 import SellerProductLayout from "./layout/SellerProductLayout";
 import SellerOrderDetail from "./pages/seller/SellerOrderDetail";
 import BuyerLayout from "./layout/BuyerLayout";
-import OrderDetail from "./pages/merchant/OrderDetail";
+import OrderDetail from "./pages/buyer/OrderDetail";
 
 function App() {
   const dispatch = useDispatch();
