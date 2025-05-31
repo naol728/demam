@@ -11,13 +11,11 @@ export async function addToCart(productId, quantity = 1) {
 
     const userId = session?.user?.id;
     if (!userId) throw new Error("User ID not found");
-
     const { data: existingCart, error: cartError } = await supabase
       .from("carts")
       .select("id")
       .eq("user_id", userId)
       .single();
-
     let cartId = existingCart?.id;
 
     if (!cartId) {
@@ -35,26 +33,17 @@ export async function addToCart(productId, quantity = 1) {
       cartId = newCart.id;
     }
 
-    const { data: existingItem } = await supabase
+    const { data: addedcart, error } = await supabase
       .from("cart_items")
-      .select("id, quantity")
-      .eq("cart_id", cartId)
-      .eq("product_id", productId)
-      .single();
-
-    if (existingItem) {
-      await supabase
-        .from("cart_items")
-        .update({ quantity: existingItem.quantity + quantity })
-        .eq("id", existingItem.id);
-    } else {
-      // 4. Add new item
-      await supabase.from("cart_items").insert({
+      .insert({
         cart_id: cartId,
         product_id: productId,
         quantity: quantity,
       });
+    if (error) {
+      throw new Error(error.message);
     }
+    return { success: true, data: addedcart };
   } catch (err) {
     throw new Error(err.message);
   }
@@ -93,7 +82,6 @@ export async function getallcartstobuyer() {
       .eq("cart_id", cart.id);
 
     if (error) throw new Error(error.message);
-
     return cart_items;
   } catch (err) {
     throw new Error(err.message);
@@ -121,15 +109,30 @@ export async function addcartitemquantity(id, operation) {
 
     const { data: cart_item, error: itemError } = await supabase
       .from("cart_items")
-      .select("id, quantity")
+      .select("id, quantity,product_id")
       .eq("cart_id", cart.id)
       .eq("product_id", id)
       .single();
+
+    const { data: product } = await supabase
+      .from("products")
+      .select("stock_quantity")
+      .eq("id", cart_item.product_id)
+      .single();
+
     if (itemError) throw new Error(itemError.message);
     if (!cart_item) throw new Error("Cart item not found");
 
-    const newQuantity =
-      operation === "inc" ? cart_item.quantity + 1 : cart_item.quantity - 1;
+    let newQuantity;
+    if (operation === "inc") {
+      if (product.stock_quantity <= cart_item.quantity) {
+        throw new Error("product quantity is not sufficent ");
+      }
+
+      newQuantity = cart_item.quantity + 1;
+    } else {
+      newQuantity = cart_item.quantity - 1;
+    }
 
     if (newQuantity <= 0) {
       const { error: deleteError } = await supabase
