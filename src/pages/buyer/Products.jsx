@@ -45,7 +45,7 @@ export default function Products() {
     isLoading: cartitemsloading,
   } = useQuery({
     queryKey: ["cart_items"],
-    queryFn: () => getallcartstobuyer(),
+    queryFn: getallcartstobuyer,
   });
 
   const allProducts = data?.pages.flatMap((page) => page.data) || [];
@@ -96,7 +96,7 @@ export default function Products() {
     [isFetchingNextPage, fetchNextPage, hasNextPage]
   );
 
-  if (isLoading) {
+  if (isLoading || cartitemsloading) {
     return (
       <div className="flex  h-full max-w-5xl w-full  space-y-3">
         <Skeleton className="h-[125px] w-[250px] rounded-xl" />
@@ -111,7 +111,14 @@ export default function Products() {
       </div>
     );
   }
-
+  if (cart_itemserr) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-8">Error loading cart items</h1>
+        <p className="text-red-500">{cart_itemserr.message}</p>
+      </div>
+    );
+  }
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-8 capitalize">

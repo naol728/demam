@@ -48,6 +48,37 @@ export default function SellerProfile() {
 
   const handleUpdate = () => {
     const updated = { ...user };
+    const { name, email, phone } = updated;
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(name)) {
+      toast({
+        title: "Error",
+        description: "Name should only contain letters and spaces.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const phoneRegex = /^\d{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+      toast({
+        title: "Error",
+        description: "Phone number should contain only digits (10-15 digits).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (profileimg) updated.profileimg = profileimg;
     mutate(updated);
   };

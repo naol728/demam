@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, Navigate, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { GalleryVerticalEnd } from "lucide-react";
-import { fetchUser, setUser } from "@/store/user/userslice";
+import { fetchUser } from "@/store/user/userslice";
 
 export default function SignUp() {
   const { toast } = useToast();
@@ -55,6 +55,64 @@ export default function SignUp() {
       return;
     }
     const data = { email, password, role, profileimg, name, phone };
+
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(name)) {
+      toast({
+        title: "Error",
+        description: "Name should only contain letters and spaces.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const phoneRegex = /^\d{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+      toast({
+        title: "Error",
+        description: "Phone number should contain only digits (10-15 digits).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!profileimg) {
+      toast({
+        title: "Error",
+        description: "Please upload a profile image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!role) {
+      toast({
+        title: "Error",
+        description: "Please select a role.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     await mutateAsync(data);
   };
 

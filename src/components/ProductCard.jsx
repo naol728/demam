@@ -22,7 +22,11 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
   const [showDetail, setShowDetail] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { mutate: addCartMutate, isPending: isAdding } = useMutation({
+  const {
+    mutate: addCartMutate,
+    isPending: isAdding,
+    isError: addcarterror,
+  } = useMutation({
     mutationKey: ["cart-add", product.id],
     mutationFn: () => addToCart(product.id),
     onSuccess: () => {
@@ -67,6 +71,9 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
       });
     },
   });
+  if (addcarterror) {
+    return <div className="text-red-500">{addcarterror.message}</div>;
+  }
 
   return (
     <Card className="w-full max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow border rounded-lg">
@@ -150,7 +157,11 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
                 <Trash />
               </Button>
               <Button
-                disabled={!product.stock_quantity || isUpdating}
+                disabled={
+                  !product.stock_quantity ||
+                  isUpdating ||
+                  inCartQunetity(product.id)?.quantity >= product.stock_quantity
+                }
                 variant="outline"
                 size="icon"
                 onClick={() => updateCartMutate({ id: product.id, op: "inc" })}
