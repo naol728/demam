@@ -2,27 +2,27 @@ import * as React from "react";
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import supabase from "@/services/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
 
 export default function MapView({ order, product }) {
   const mapRef = React.useRef();
-  const [lat, setLat] = React.useState(order.latitude); // Buyer
+  const [lat, setLat] = React.useState(order.latitude);
   const [lng, setLng] = React.useState(order.longitude);
-  const [prodLat, setProdLat] = React.useState(null); // Product
+  const [prodLat, setProdLat] = React.useState(null);
   const [prodLng, setProdLng] = React.useState(null);
   const [route, setRoute] = React.useState(null);
   const [distance, setDistance] = React.useState(null);
   const [isMapLoaded, setIsMapLoaded] = React.useState(false);
-
+  const { toast } = useToast();
   const [viewState, setViewState] = React.useState({
     latitude: order.latitude,
     longitude: order.longitude,
     zoom: 12,
   });
 
-  // Automatically fit the bounds when both locations are known
   React.useEffect(() => {
     if (lat && lng && prodLat && prodLng && mapRef.current) {
       const bounds = [
@@ -36,24 +36,29 @@ export default function MapView({ order, product }) {
     }
   }, [lat, lng, prodLat, prodLng]);
 
-  // Simulate buyer movement
   React.useEffect(() => {
     let watchId;
 
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        console.log("Buyer location:", coords);
         setLat(coords.latitude);
         setLng(coords.longitude);
         updateBuyerLocation(coords.latitude, coords.longitude);
 
-        // Start tracking after permission granted
         watchId = navigator.geolocation.watchPosition(
           ({ coords }) => {
             setLat(coords.latitude);
-            setLat(coords.longitude);
+            setLng(coords.longitude);
             updateBuyerLocation(coords.latitude, coords.longitude);
           },
-          (error) => console.error("Geolocation error during tracking:", error),
+          (error) =>
+            toast({
+              title: "Geolocation Error",
+              description:
+                error.message ||
+                "Error tracking your location. Please check permissions.",
+            }),
           { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
         );
       },
@@ -75,10 +80,7 @@ export default function MapView({ order, product }) {
       .eq("id", order.id);
   }
 
-  // Subscribe to product location updates
   React.useEffect(() => {
-    if (!product) return;
-
     const fetchInitialLocation = async () => {
       const { data } = await supabase
         .from("products")
@@ -114,7 +116,6 @@ export default function MapView({ order, product }) {
     return () => supabase.removeChannel(channel);
   }, [product]);
 
-  // Fetch and draw the route
   React.useEffect(() => {
     if (!prodLat || !prodLng || !lat || !lng) return;
 
@@ -125,13 +126,12 @@ export default function MapView({ order, product }) {
 
       if (data.routes && data.routes.length > 0) {
         setRoute(data.routes[0].geometry);
-        setDistance((data.routes[0].distance / 1000).toFixed(2)); // in kilometers
+        setDistance((data.routes[0].distance / 1000).toFixed(2));
       }
     };
 
     fetchRoute();
   }, [prodLat, prodLng, lat, lng]);
-  console.log(lat, lng);
   return (
     <div className="h-full w-full rounded overflow-hidden relative">
       <Map
@@ -143,13 +143,11 @@ export default function MapView({ order, product }) {
         onMove={(evt) => setViewState(evt.viewState)}
         onLoad={() => setIsMapLoaded(true)}
       >
-        {/* Buyer Marker */}
         <Marker latitude={lat} longitude={lng} color="red" />
         <Popup latitude={lat} longitude={lng} closeButton={false}>
           Me
         </Popup>
 
-        {/* Product Marker */}
         {prodLat && prodLng && (
           <>
             <Marker latitude={prodLat} longitude={prodLng} color="green" />
@@ -159,7 +157,6 @@ export default function MapView({ order, product }) {
           </>
         )}
 
-        {/* Route Line */}
         {isMapLoaded && route && (
           <Source
             id="route"

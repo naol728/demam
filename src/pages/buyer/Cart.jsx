@@ -48,7 +48,7 @@ export default function Cart() {
     0
   );
 
-  const { mutate: updateCartMutate, isPending: isUpdating } = useMutation({
+  const { mutate: updateCartMutate } = useMutation({
     mutationFn: ({ id, op }) => addcartitemquantity(id, op),
     onSuccess: () => {
       queryClient.invalidateQueries(["carts_item"]);
@@ -63,7 +63,7 @@ export default function Cart() {
     },
   });
 
-  const { mutate: deleteCartMutate, isPending: isDeleting } = useMutation({
+  const { mutate: deleteCartMutate } = useMutation({
     mutationFn: deleteCartItem,
     onSuccess: () => {
       queryClient.invalidateQueries(["carts_item"]);
@@ -81,10 +81,7 @@ export default function Cart() {
   const { mutate: createOrder, isPending: creatingOrder } = useMutation({
     mutationFn: () => createAnOrder({ latitude, longitude, location }),
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Order created successfully.",
-      });
+      toast({ title: "Success", description: "Order created successfully." });
       naviage("/orders");
     },
     onError: (err) => {
@@ -126,96 +123,106 @@ export default function Cart() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 mt-10 space-y-8">
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
       {carts.length > 0 ? (
         <>
-          {/* Search */}
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-semibold">Your Cart</h1>
+          {/* Header & Search */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+              🛒 Your Cart
+            </h1>
             <Input
-              type="text"
-              placeholder="Search product..."
+              placeholder="🔍 Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-xs"
+              className="max-w-sm"
             />
           </div>
 
-          {/* Table */}
-          <Table>
-            <TableCaption>Your selected products</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Qty</TableHead>
-                <TableHead>Actions</TableHead>
-                <TableHead>Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCarts?.map((cart) => (
-                <TableRow key={cart?.id}>
-                  <TableCell>{cart?.product?.name}</TableCell>
-                  <TableCell>
-                    <img
-                      src={cart?.product?.image_url}
-                      alt={cart?.product?.name}
-                      className="w-12 h-12 rounded-md object-cover"
-                    />
+          {/* Cart Table */}
+          <div className="rounded-xl shadow border bg-white overflow-hidden">
+            <Table>
+              <TableCaption>
+                These are the items you're about to buy
+              </TableCaption>
+              <TableHeader className="bg-gray-50">
+                <TableRow>
+                  <TableHead className="font-semibold">Name</TableHead>
+                  <TableHead>Image</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
+                  <TableHead>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCarts.map((cart) => (
+                  <TableRow key={cart.id}>
+                    <TableCell>{cart.product.name}</TableCell>
+                    <TableCell>
+                      <img
+                        src={cart.product.image_url}
+                        alt={cart.product.name}
+                        className="w-14 h-14 object-cover rounded-md border"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {cart.quantity}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center items-center gap-2">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() =>
+                            updateCartMutate({ id: cart.product.id, op: "dec" })
+                          }
+                        >
+                          <Minus size={16} />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          onClick={() => deleteCartMutate(cart.product.id)}
+                        >
+                          <Trash size={16} />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() =>
+                            updateCartMutate({ id: cart.product.id, op: "inc" })
+                          }
+                        >
+                          <Plus size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold text-green-600">
+                      {formatPrice(cart.product.price * cart.quantity)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter className="bg-card">
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-right font-bold text-lg"
+                  >
+                    Total
                   </TableCell>
-                  <TableCell>{cart?.quantity}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() =>
-                          updateCartMutate({ id: cart.product.id, op: "dec" })
-                        }
-                      >
-                        <Minus size={16} />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => deleteCartMutate(cart.product.id)}
-                      >
-                        <Trash size={16} />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() =>
-                          updateCartMutate({ id: cart.product.id, op: "inc" })
-                        }
-                      >
-                        <Plus size={16} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {formatPrice(cart?.product?.price * cart?.quantity)}
+                  <TableCell className="text-green-700 font-extrabold text-xl">
+                    {formatPrice(totalPrice)}
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={4} className="text-right font-semibold">
-                  Total
-                </TableCell>
-                <TableCell className="font-bold text-green-600">
-                  {formatPrice(totalPrice)}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
+              </TableFooter>
+            </Table>
+          </div>
 
-          {/* Location Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Delivery Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
             <div>
-              <Label htmlFor="location">Delivery Location</Label>
+              <Label htmlFor="location">📍 Delivery Location</Label>
               <Input
                 id="location"
                 placeholder="e.g. Addis Ababa"
@@ -223,7 +230,7 @@ export default function Cart() {
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex gap-4">
               <div className="flex-1">
                 <Label htmlFor="latitude">Latitude</Label>
                 <Input
@@ -243,25 +250,35 @@ export default function Cart() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4 mt-4">
-            <Button onClick={handleGetLocation} disabled={creatingOrder}>
-              📍 Auto-Fill My Location
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <Button
+              onClick={handleGetLocation}
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={creatingOrder}
+            >
+              📌 Auto-Fill My Location
             </Button>
             <Button
               onClick={() => createOrder()}
               disabled={creatingOrder || !location || !latitude || !longitude}
+              className="w-full sm:w-auto"
             >
-              {creatingOrder ? "Placing Order..." : "Confirm Order"}
+              {creatingOrder ? "Placing Order..." : "✅ Confirm Order"}
             </Button>
           </div>
         </>
       ) : (
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-semibold">
-            Your cart is empty. Add something 😊
+        <div className="text-center space-y-6 py-10">
+          <h2 className="text-2xl font-semibold text-gray-700">
+            🛍️ Your cart is empty
           </h2>
+          <p className="text-gray-500">
+            Start adding some amazing products to your cart.
+          </p>
           <Link to="/products">
-            <Button>Browse Products</Button>
+            <Button>🔎 Browse Products</Button>
           </Link>
         </div>
       )}

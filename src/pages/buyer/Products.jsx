@@ -32,13 +32,13 @@ export default function Products() {
     useInfiniteQuery({
       queryKey: ["products"],
       queryFn: ({ pageParam = 1 }) => getAllproductstobuyer(pageParam, limit),
-      getNextPageParam: (lastPage, pages) => {
-        if (lastPage.page < lastPage.totalPages) {
-          return lastPage.page + 1;
-        }
-        return undefined;
+      getNextPageParam: (lastPage) => {
+        return lastPage?.page < lastPage?.totalPages
+          ? lastPage?.page + 1
+          : undefined;
       },
     });
+
   const {
     data: cart_items,
     error: cart_itemserr,
@@ -49,12 +49,13 @@ export default function Products() {
   });
 
   const allProducts = data?.pages.flatMap((page) => page.data) || [];
-  const isInCart = (productId) => {
-    return cart_items?.some((item) => item.product_id === productId);
-  };
-  const inCartQunetity = (productid) => {
-    return cart_items?.find((item) => item.product_id === productid);
-  };
+
+  const isInCart = (productId) =>
+    cart_items?.some((item) => item.product_id === productId);
+
+  const inCartQunetity = (productid) =>
+    cart_items?.find((item) => item.product_id === productid);
+
   const filteredProducts = useMemo(() => {
     let filtered = allProducts.filter(
       (product) =>
@@ -86,9 +87,7 @@ export default function Products() {
       if (observerRef.current) observerRef.current.disconnect();
 
       observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
+        if (entries[0].isIntersecting && hasNextPage) fetchNextPage();
       });
 
       if (node) observerRef.current.observe(node);
@@ -98,53 +97,47 @@ export default function Products() {
 
   if (isLoading || cartitemsloading) {
     return (
-      <div className="flex  h-full max-w-5xl w-full  space-y-3">
-        <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-        <div className="space-y-2">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <div key={index}>
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-            </div>
-          ))}
-        </div>
+      <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Skeleton key={index} className="h-[320px] w-full rounded-xl" />
+        ))}
       </div>
     );
   }
+
   if (cart_itemserr) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8">Error loading cart items</h1>
-        <p className="text-red-500">{cart_itemserr.message}</p>
+      <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-semibold text-destructive mb-4">
+          Error loading cart items
+        </h1>
+        <p className="text-muted-foreground">{cart_itemserr.message}</p>
       </div>
     );
   }
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8 capitalize">
-        👋 Welcome Back {user?.name?.split(" ")[0]}
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-6">
+        👋 Welcome back, {user?.name?.split(" ")[0]}
       </h1>
 
-      {/* Search and Sort */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div className="w-full sm:w-1/2">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10">
+        <div className="w-full md:w-1/2">
           <Label htmlFor="search">Search Products</Label>
           <Input
             id="search"
             placeholder="Search by name or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="mt-1"
           />
         </div>
-
-        <div className="w-full sm:w-1/3">
+        <div className="w-full md:w-1/3">
           <Label htmlFor="sort">Sort Products</Label>
-          <Select
-            value={sortOption}
-            onValueChange={(value) => setSortOption(value)}
-          >
-            <SelectTrigger id="sort">
-              <SelectValue placeholder="Sort products" />
+          <Select value={sortOption} onValueChange={setSortOption}>
+            <SelectTrigger id="sort" className="mt-1">
+              <SelectValue placeholder="Sort by..." />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="newest">Newest</SelectItem>
@@ -156,22 +149,10 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Products Grid */}
-      {filteredProducts?.length > 0 ? (
-        <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {filteredProducts.length > 0 ? (
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {filteredProducts.map((product, index) => {
-            if (index === filteredProducts?.length - 1) {
-              return (
-                <div key={product.id} ref={lastProductRef}>
-                  <ProductCard
-                    product={product}
-                    isInCart={isInCart}
-                    inCartQunetity={inCartQunetity}
-                  />
-                </div>
-              );
-            }
-            return (
+            const productCard = (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -179,16 +160,26 @@ export default function Products() {
                 inCartQunetity={inCartQunetity}
               />
             );
+
+            if (index === filteredProducts?.length - 1) {
+              return (
+                <div key={product.id} ref={lastProductRef}>
+                  {productCard}
+                </div>
+              );
+            }
+
+            return productCard;
           })}
         </div>
       ) : (
-        <div className="text-center text-muted-foreground mt-10">
+        <div className="text-center text-muted-foreground text-sm mt-12">
           No products found.
         </div>
       )}
 
       {isFetchingNextPage && (
-        <div className="text-center mt-4 text-sm text-muted-foreground">
+        <div className="text-center mt-8 text-sm text-muted-foreground animate-pulse">
           Loading more products...
         </div>
       )}

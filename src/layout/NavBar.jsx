@@ -30,20 +30,20 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
   const location = useLocation();
-
-  const { data: carts } = useQuery({
-    queryFn: () => getallcartstobuyer(),
-    queryKey: ["carts_item"],
-  });
-  const { data: orders } = useQuery({
-    queryKey: ["orders"],
-    queryFn: () => getOrderstoBuyer(),
-  });
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handlesignout = async () => {
+  const { data: carts } = useQuery({
+    queryFn: getallcartstobuyer,
+    queryKey: ["carts_item"],
+  });
+
+  const { data: orders } = useQuery({
+    queryFn: getOrderstoBuyer,
+    queryKey: ["orders"],
+  });
+
+  const handleSignOut = async () => {
     await signOut();
     dispatch(clearUser());
     navigate("/");
@@ -51,147 +51,142 @@ export default function NavBar() {
 
   const isActive = (path) =>
     location.pathname === path
-      ? "text-primary font-bold border-b-2 border-primary"
-      : "text-gray-600 hover:text-primary transition";
+      ? "text-primary font-semibold border-b-2 border-primary"
+      : "text-muted-foreground hover:text-primary";
 
   return (
-    <nav className="shadow-md px-4 py-3 w-full fixed bg-background/90 backdrop-blur-md z-50 border-b border-border-200">
+    <nav className="fixed top-0 left-0 w-full bg-background/90 backdrop-blur-md border-b z-50 shadow-sm px-4 py-3">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Logo */}
         <Link
           to="/"
           className="flex items-center gap-2 font-semibold text-xl text-primary"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div className="h-8 w-8 flex items-center justify-center bg-primary text-white rounded-md">
             <GalleryVerticalEnd size={20} />
           </div>
-          Demam Platform
+          Demam
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex space-x-10 text-base">
+        <div className="hidden md:flex items-center gap-8 text-base">
           <Link
             to="/products"
-            className={`flex items-center gap-2 ${isActive("/products")}`}
+            className={`flex items-center gap-1 ${isActive("/products")}`}
           >
-            <ShoppingBag size={20} />
-            Products
+            <ShoppingBag size={18} /> Products
           </Link>
 
           <Link
             to="/carts"
-            className={`flex items-center gap-2 relative ${isActive("/carts")}`}
+            className={`relative flex items-center gap-1 ${isActive("/carts")}`}
           >
-            <ShoppingCart size={20} />
-            <Badge
-              className="absolute -top-2 -right-3 px-1.5 py-0 text-xs rounded-full"
-              variant="secondary"
-            >
-              {carts?.length ?? 0}
-            </Badge>
+            <ShoppingCart size={18} />
             Cart
+            {carts?.length > 0 && (
+              <Badge className="absolute -top-2 -right-3 px-1 py-0.5 text-xs">
+                {carts.length}
+              </Badge>
+            )}
           </Link>
 
           <Link
             to="/orders"
-            className={`flex items-center gap-2 relative ${isActive("/orders")}`}
+            className={`relative flex items-center gap-1 ${isActive("/orders")}`}
           >
-            <ArrowUpFromLine size={20} />
-            <Badge
-              className="absolute -top-2 -right-3 px-1.5 py-0 text-xs rounded-full"
-              variant="secondary"
-            >
-              {orders?.length ?? 0}
-            </Badge>
+            <ArrowUpFromLine size={18} />
             Orders
+            {orders?.length > 0 && (
+              <Badge className="absolute -top-2 -right-3 px-1 py-0.5 text-xs">
+                {orders.length}
+              </Badge>
+            )}
           </Link>
         </div>
 
-        {/* Avatar & Mobile Menu */}
         <div className="flex items-center space-x-4">
           <DropdownMenu>
-            <div className="uppercase font-bold hidden md:block mr-2 select-none">
-              👋 {user?.name.split(" ")[0]}
-            </div>
             <DropdownMenuTrigger asChild>
-              <Avatar className="cursor-pointer ring-2 ring-primary ring-offset-2 ring-offset-white">
-                <AvatarImage src={user?.profileimg} alt="User" />
-                <AvatarFallback>NA</AvatarFallback>
-              </Avatar>
+              <div className="flex items-center gap-2 cursor-pointer">
+                <Avatar className="ring-2 ring-primary">
+                  <AvatarImage src={user?.profileimg} alt="user" />
+                  <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
+                </Avatar>
+                <span className="hidden md:block font-medium text-sm uppercase">
+                  👋 {user?.name?.split(" ")[0]}
+                </span>
+              </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem>
-                <Link to="/profile" className="w-full flex gap-2 items-center">
-                  <CircleUser />
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="flex items-center gap-2 w-full">
+                  <CircleUser size={16} />
                   Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={handlesignout}
-                className="flex items-center gap-2"
+                onClick={handleSignOut}
+                className="flex items-center gap-2 text-destructive"
               >
-                <LogOut />
+                <LogOut size={16} />
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Mobile Toggle Button */}
           <Button
-            variant="ghost"
             size="icon"
+            variant="ghost"
             className="md:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => setMenuOpen((prev) => !prev)}
             aria-label="Toggle menu"
           >
-            {menuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </Button>
         </div>
       </div>
 
-      {/* Mobile Links */}
       {menuOpen && (
-        <div className="md:hidden mt-3 space-y-3 bg-white border-t border-gray-200 py-4 shadow-lg rounded-b-md z-50">
+        <div className="md:hidden mt-3 space-y-2 py-4 px-4 bg-white border-t rounded-b-md shadow-lg">
           <Link
             to="/products"
-            className={`block px-4 py-2 text-center rounded-md ${isActive("/products")}`}
             onClick={() => setMenuOpen(false)}
+            className={isActive("/products")}
           >
-            Products
+            <div className="flex items-center gap-2 py-2">
+              <ShoppingBag size={18} />
+              Products
+            </div>
           </Link>
 
           <Link
             to="/carts"
-            className={`flex justify-center items-center gap-2 relative px-4 py-2 rounded-md ${isActive("/carts")}`}
             onClick={() => setMenuOpen(false)}
+            className={isActive("/carts")}
           >
-            <ShoppingCart size={20} />
-            <Badge
-              className="absolute -top-2 -right-3 px-1.5 py-0 text-xs rounded-full"
-              variant="secondary"
-            >
-              {carts?.length ?? 0}
-            </Badge>
-            Cart
+            <div className="flex items-center gap-2 relative py-2">
+              <ShoppingCart size={18} />
+              Cart
+              {carts?.length > 0 && (
+                <Badge className="absolute top-1 right-4 px-1 py-0.5 text-xs">
+                  {carts.length}
+                </Badge>
+              )}
+            </div>
           </Link>
 
           <Link
             to="/orders"
-            className={`flex justify-center items-center gap-2 px-4 py-2 rounded-md ${isActive("/orders")}`}
             onClick={() => setMenuOpen(false)}
+            className={isActive("/orders")}
           >
-            <ArrowUpFromLine size={20} />
-            <Badge
-              className="absolute -top-2 -right-3 px-1.5 py-0 text-xs rounded-full"
-              variant="secondary"
-            >
-              {orders?.length ?? 0}
-            </Badge>
-            Orders
+            <div className="flex items-center gap-2 relative py-2">
+              <ArrowUpFromLine size={18} />
+              Orders
+              {orders?.length > 0 && (
+                <Badge className="absolute top-1 right-4 px-1 py-0.5 text-xs">
+                  {orders.length}
+                </Badge>
+              )}
+            </div>
           </Link>
         </div>
       )}
