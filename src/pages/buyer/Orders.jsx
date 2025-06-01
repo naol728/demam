@@ -28,8 +28,6 @@ export default function Orders() {
     navigate(`/orders/${id}`);
   };
 
-  console.log(orders);
-
   if (isLoading) {
     return (
       <div className="flex flex-col h-full max-w-5xl w-full space-y-4 mx-auto mt-6">

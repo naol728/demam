@@ -71,6 +71,7 @@ export default function ProductCard({ product, isInCart, inCartQunetity }) {
       });
     },
   });
+  
   if (addcarterror) {
     return <div className="text-red-500">{addcarterror.message}</div>;
   }

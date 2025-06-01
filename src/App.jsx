@@ -37,7 +37,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
         </Route>
 
-        {/* Merchant protected routes */}
+        {/* buyer protected routes */}
         <Route element={<Protectedroute role="merchant" />}>
           <Route element={<BuyerLayout />}>
             <Route path="/products" element={<Products />} />

@@ -151,11 +151,23 @@ export const createAnOrder = async ({ latitude, longitude, location }) => {
         name,
         price,
         image_url,
-        seller_id)`
+        seller_id,
+        stock_quantity)`
       )
       .eq("cart_id", cart.id);
 
     if (error) throw new Error(error.message);
+
+    await Promise.all(
+      cart_items.map((item) =>
+        supabase
+          .from("products")
+          .update({
+            stock_quantity: item.product.stock_quantity - item.quantity,
+          })
+          .eq("id", item.product_id)
+      )
+    ).catch((err) => console.log(err));
 
     const amount = cart_items.reduce(
       (sum, item) => sum + item.quantity * item.product.price,
