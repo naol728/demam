@@ -29,7 +29,7 @@ export default function ProductDetailModal({ isOpen, onClose, product }) {
           <img
             src={product.image_url}
             alt={product.name}
-            className="w-full h-52 object-cover rounded-md"
+            className="w-full h-52 object-cover rounded-lg shadow-md mb-4"
           />
 
           <h3 className="text-lg font-semibold">{product.name}</h3>
@@ -95,7 +95,6 @@ export default function ProductDetailModal({ isOpen, onClose, product }) {
           )}
         </div>
 
-        {/* Close Button */}
         <div className="flex justify-end pt-4">
           <DialogClose asChild>
             <Button variant="outline">Close</Button>

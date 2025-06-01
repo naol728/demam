@@ -4,7 +4,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import supabase from "@/services/supabase";
 import { Badge } from "@/components/ui/badge";
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
+const MAPBOX_TOKEN =
+  "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
 
 export default function SellerMapView({
   order,
@@ -20,14 +21,12 @@ export default function SellerMapView({
   const [route, setRoute] = React.useState(null);
   const [distance, setDistance] = React.useState(null);
   const [isMapLoaded, setIsMapLoaded] = React.useState(false);
-
   const [viewState, setViewState] = React.useState({
     latitude: order.latitude,
     longitude: order.longitude,
     zoom: 12,
   });
-
-  // Fit map to bounds
+  console.log(orderlat, orderlng, productLat, productLng);
   React.useEffect(() => {
     if (orderlat && orderlng && productLat && productLng && mapRef.current) {
       const bounds = [
@@ -41,7 +40,6 @@ export default function SellerMapView({
     }
   }, [orderlat, orderlng, productLat, productLng]);
 
-  // Track product movement
   React.useEffect(() => {
     let watchId;
 
@@ -70,13 +68,15 @@ export default function SellerMapView({
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, []);
+  }, [product]);
 
   async function updateProductLocation(latitude, longitude) {
-    await supabase.from("products").update({ latitude, longitude }).eq("id", product);
+    await supabase
+      .from("products")
+      .update({ latitude, longitude })
+      .eq("id", product);
   }
 
-  // Realtime order updates
   React.useEffect(() => {
     const fetchInitialLocation = async () => {
       const { data } = await supabase
@@ -112,7 +112,6 @@ export default function SellerMapView({
     return () => supabase.removeChannel(channel);
   }, [product]);
 
-  // Fetch route from Mapbox
   React.useEffect(() => {
     if (!productLat || !productLng || !orderlat || !orderlng) return;
 
@@ -148,14 +147,22 @@ export default function SellerMapView({
         {productLat && productLng && (
           <>
             <Marker latitude={productLat} longitude={productLng} color="red" />
-            <Popup latitude={productLat} longitude={productLng} closeButton={false}>
-              <p className="text-sm font-semibold text-red-700">You</p>
+            <Popup
+              latitude={productLat}
+              longitude={productLng}
+              closeButton={false}
+            >
+              <p className="text-sm font-semibold text-red-700">Me</p>
             </Popup>
           </>
         )}
 
         {isMapLoaded && route && (
-          <Source id="route" type="geojson" data={{ type: "Feature", geometry: route }}>
+          <Source
+            id="route"
+            type="geojson"
+            data={{ type: "Feature", geometry: route }}
+          >
             <Layer
               id="route-line"
               type="line"
@@ -170,10 +177,7 @@ export default function SellerMapView({
       </Map>
 
       {distance && (
-        <div
-        
-          className="absolute top-4 left-4 bg-white dark:bg-gray-800 shadow-lg rounded-full px-4 py-2"
-        >
+        <div className="absolute top-4 left-4 bg-white dark:bg-gray-800 shadow-lg rounded-full px-4 py-2">
           <Badge variant="secondary" className="text-base font-medium">
             Distance: {distance} km
           </Badge>
