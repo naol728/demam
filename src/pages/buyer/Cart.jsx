@@ -128,7 +128,7 @@ export default function Cart() {
         <>
           {/* Header & Search */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+            <h1 className="text-3xl font-bold tracking-tight text-forground">
               🛒 Your Cart
             </h1>
             <Input
@@ -140,12 +140,12 @@ export default function Cart() {
           </div>
 
           {/* Cart Table */}
-          <div className="rounded-xl shadow border bg-white overflow-hidden">
+          <div className="rounded-xl shadow border bg-background overflow-hidden">
             <Table>
               <TableCaption>
                 These are the items you're about to buy
               </TableCaption>
-              <TableHeader className="bg-gray-50">
+              <TableHeader className="bg-card/65 text-muted-foreground">
                 <TableRow>
                   <TableHead className="font-semibold">Name</TableHead>
                   <TableHead>Image</TableHead>
