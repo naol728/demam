@@ -128,7 +128,7 @@ export default function SignUp() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Demam Platform
+            Demam
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -251,7 +251,7 @@ export default function SignUp() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         <img
-          src="https://i.pinimg.com/736x/c0/f4/9a/c0f49acf9b16b3bcd4d73a2331a636fa.jpg"
+          src="https://i.pinimg.com/736x/9b/e1/5f/9be15f8148f10ace49165c2dcf370a75.jpg"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.8] "
         />
