@@ -49,7 +49,7 @@ const Hero = () => {
           </div>
           <div className="relative h-80 w-full overflow-hidden rounded-lg shadow-lg sm:h-[28rem] lg:h-[32rem]">
             <img
-              src="https://cdn.shopify.com/s/files/1/0070/7032/articles/ecommerce_d08806b6-6f5e-4a94-a79f-7eb96b46c547.jpg?v=1743403590"
+              src="https://i.pinimg.com/736x/9b/e1/5f/9be15f8148f10ace49165c2dcf370a75.jpg"
               alt="Demam platform hero"
               className="h-full w-full object-cover object-center"
               loading="lazy"
