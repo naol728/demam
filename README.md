@@ -1,12 +1,51 @@
-# React + Vite
+# 🛒 Demam – Seller & Buyer E-Commerce Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Demam is a full-stack e-commerce web application designed to connect sellers and buyers with real-time delivery tracking and modern UI/UX. Built in just **2 weeks** by [Naol Meseret], this platform offers a scalable, secure, and user-friendly experience from cart to delivery.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- 🧑‍💼 **Seller & Buyer Account Management**  
+- 🛍️ **Product Catalog & Inventory Control**  
+- 🔐 **Secure Authentication (Supabase Auth)**  
+- 📦 **Order Management System**  
+- 🗺️ **Live Delivery Tracking with Mapbox**  
+- 💻 **Fully Responsive Design (Mobile-First)**  
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React, Redux Toolkit, ShadCN UI, Tailwind CSS |
+| **Backend / Database** | Supabase (PostgreSQL, Auth, Storage) |
+| **Data Fetching** | TanStack Query (React Query) |
+| **Maps & Tracking** | Mapbox GL JS |
+| **Deployment** | Vercel |
+
+---
+
+## 📸 Screenshots
+
+> Coming soon – UI previews and workflow demos!
+
+---
+
+## ⚙️ Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/demam-ecommerce.git
+cd demam-ecommerce
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+cp .env.example .env
+# Fill in your Supabase and Mapbox keys in the .env file
+
+# 4. Start the development server
+npm run dev
