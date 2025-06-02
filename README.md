@@ -33,24 +33,21 @@ Demam is a full-stack e-commerce web application designed to connect sellers and
 
 Here are some preview shots of the **Demam E-Commerce Platform** in action:
 
-### 🏠 Home & Product Views
 
-![Home](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092622.png?raw=true)
-![Products](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092635.png?raw=true)
 
-### 🛒 Cart & Order Management
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092622.png?raw=true)
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092635.png?raw=true)
 
-![Cart](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092751.png?raw=true)
-![Orders](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092832.png?raw=true)
 
-### 🗺️ Real-Time Order Tracking (Map View)
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092751.png?raw=true)
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092832.png?raw=true)
 
-![Mapbox Tracking](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092851.png?raw=true)
 
-### 👤 Seller Dashboard & Product Control
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092851.png?raw=true)
 
-![Seller Dashboard](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092505.png?raw=true)
-![Product Management](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092521.png?raw=true)
+
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092505.png?raw=true)
+(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092521.png?raw=true)
 
 ---
 
