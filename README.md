@@ -29,7 +29,7 @@ Demam is a full-stack e-commerce web application designed to connect sellers and
 
 ## 📸 Screenshots
 
-> Coming soon – UI previews and workflow demos!
+> [![Watch the demo]([https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg](https://youtu.be/Oe27ZnU_75U))]([https://youtu.be/YOUR_VIDEO_ID](https://youtu.be/Oe27ZnU_75U))
 
 ---
 
@@ -37,8 +37,8 @@ Demam is a full-stack e-commerce web application designed to connect sellers and
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/demam-ecommerce.git
-cd demam-ecommerce
+git clone https://github.com/naol728/demam.git
+cd demam
 
 # 2. Install dependencies
 npm install
