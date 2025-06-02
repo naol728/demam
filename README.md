@@ -35,19 +35,16 @@ Here are some preview shots of the **Demam E-Commerce Platform** in action:
 
 
 
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092622.png?raw=true)
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092635.png?raw=true)
+## 📸 Screenshots
 
+![Screenshot 1](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092622.png?raw=true)
+![Screenshot 2](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092635.png?raw=true)
+![Screenshot 3](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092751.png?raw=true)
+![Screenshot 4](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092832.png?raw=true)
+![Screenshot 5](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092851.png?raw=true)
+![Screenshot 6](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092505.png?raw=true)
+![Screenshot 7](https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092521.png?raw=true)
 
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092751.png?raw=true)
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092832.png?raw=true)
-
-
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092851.png?raw=true)
-
-
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092505.png?raw=true)
-(https://github.com/naol728/demam/blob/main/public/Screenshot%202025-06-02%20092521.png?raw=true)
 
 ---
 
