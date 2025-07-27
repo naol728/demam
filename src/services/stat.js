@@ -37,8 +37,6 @@ export const getStats = async () => {
         categoryCounts[catName]++;
       }
     });
-    //calculating the avarage price of the products
-
     const totalPrice = products.reduce((acc, product) => {
       acc = +product.price || 0;
       return acc;

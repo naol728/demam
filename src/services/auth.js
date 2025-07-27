@@ -29,7 +29,6 @@ async function signOut() {
 
 const signinUser = async ({ email, password }) => {
   try {
-    // Check if the user exists in the "users" table
     const { data: existingUser, error: userCheckError } = await supabase
       .from("users")
       .select("*")
@@ -40,7 +39,6 @@ const signinUser = async ({ email, password }) => {
       throw new Error("No user found with this email.");
     }
 
-    // Proceed with signing in the user
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -50,7 +48,6 @@ const signinUser = async ({ email, password }) => {
       throw new Error(error.message);
     }
 
-    // Optional: check if the user exists in the "users" table
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("*")
@@ -61,7 +58,7 @@ const signinUser = async ({ email, password }) => {
       throw new Error("User authentication succeeded, but no user data found.");
     }
 
-    return userData; // Return the user record (including their role, etc.)
+    return userData;
   } catch (err) {
     throw new Error(err.message);
   }

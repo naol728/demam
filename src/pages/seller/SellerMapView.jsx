@@ -4,8 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import supabase from "@/services/supabase";
 import { Badge } from "@/components/ui/badge";
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoibmFvbDUyOCIsImEiOiJjbWF0c2l4c2YwYjVhMmtxeHlkYWtxb21hIn0.Sq4AN9lBtwyqcCmlOprAYg";
+const MAPBOX_TOKEN = import.meta.env.MAPBOX_TOKEN;
 
 export default function SellerMapView({
   order,

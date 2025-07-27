@@ -140,7 +140,6 @@ export const updatepayment = async ({ id, payment_method, amount, file }) => {
       payment_img = publicUrlData.publicUrl;
     }
 
-    // Update the payment record
     const { error: updateError } = await supabase
       .from("payments")
       .update({
